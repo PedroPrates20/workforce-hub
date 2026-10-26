@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import type { User, Tab, Lang, RosterData, Site, Employee, SupplyRequest, HolidayRequest, HolidayBlock } from './types';
-import { C, MOCK_SITES, MOCK_SWAPS, MOCK_EMPLOYEES, buildSeedRoster, TABS } from './constants';
+import { C, DEMO_MODE, MOCK_SITES, MOCK_SWAPS, MOCK_EMPLOYEES, buildSeedRoster, TABS } from './constants';
 import { Ctx } from './context/AppContext';
 
 import { Sidebar } from './components/Sidebar';
@@ -45,7 +45,7 @@ export default function WorkforceApp() {
     try { localStorage.setItem("epm_lang", l); } catch { /* ignore */ }
   };
   const [tab, setTab] = useState<Tab>("dashboard");
-  const [roster, setRoster] = useState<RosterData>(()=>import.meta.env.DEV?buildSeedRoster():{});
+  const [roster, setRoster] = useState<RosterData>(()=>DEMO_MODE?buildSeedRoster():{});
   const [swaps, setSwaps] = useState(MOCK_SWAPS);
   const [supplyRequests, setSupplyRequests] = useState<SupplyRequest[]>([]);
   const [supplyRequestsLoaded, setSupplyRequestsLoaded] = useState(false);
@@ -59,7 +59,7 @@ export default function WorkforceApp() {
   const [employeesLoaded, setEmployeesLoaded] = useState(false);
 
   useEffect(() => {
-    if(!import.meta.env.DEV){setSupplyRequestsLoaded(true);return;}
+    if(!DEMO_MODE){setSupplyRequestsLoaded(true);return;}
     try {
       const saved = localStorage.getItem('epm_supply_requests');
       if (saved) {
@@ -73,12 +73,12 @@ export default function WorkforceApp() {
   }, []);
 
   useEffect(() => {
-    if (!import.meta.env.DEV || !supplyRequestsLoaded) return;
+    if (!DEMO_MODE || !supplyRequestsLoaded) return;
     try { localStorage.setItem('epm_supply_requests', JSON.stringify(supplyRequests)); } catch { /* ignore storage failures */ }
   }, [supplyRequests, supplyRequestsLoaded]);
 
   useEffect(() => {
-    if(!import.meta.env.DEV){setHolidayRequestsLoaded(true);return;}
+    if(!DEMO_MODE){setHolidayRequestsLoaded(true);return;}
     try {
       const saved = localStorage.getItem('epm_holiday_requests');
       if (saved) {
@@ -92,12 +92,12 @@ export default function WorkforceApp() {
   }, []);
 
   useEffect(() => {
-    if (!import.meta.env.DEV || !holidayRequestsLoaded) return;
+    if (!DEMO_MODE || !holidayRequestsLoaded) return;
     try { localStorage.setItem('epm_holiday_requests', JSON.stringify(holidayRequests)); } catch { /* ignore storage failures */ }
   }, [holidayRequests, holidayRequestsLoaded]);
 
   useEffect(() => {
-    if (!import.meta.env.DEV) { setHolidayBlocksLoaded(true); return; }
+    if (!DEMO_MODE) { setHolidayBlocksLoaded(true); return; }
     try {
       const saved = localStorage.getItem('epm_holiday_blocks');
       if (saved) {
@@ -111,12 +111,12 @@ export default function WorkforceApp() {
   }, []);
 
   useEffect(() => {
-    if (!import.meta.env.DEV || !holidayBlocksLoaded) return;
+    if (!DEMO_MODE || !holidayBlocksLoaded) return;
     try { localStorage.setItem('epm_holiday_blocks', JSON.stringify(holidayBlocks)); } catch { /* ignore storage failures */ }
   }, [holidayBlocks, holidayBlocksLoaded]);
 
   useEffect(() => {
-    if(!import.meta.env.DEV){setEmployeesLoaded(true);return;}
+    if(!DEMO_MODE){setEmployeesLoaded(true);return;}
     try {
       const saved = localStorage.getItem('epm_employees');
       if (saved) {
@@ -130,7 +130,7 @@ export default function WorkforceApp() {
   }, []);
 
   useEffect(() => {
-    if (!import.meta.env.DEV || !employeesLoaded) return;
+    if (!DEMO_MODE || !employeesLoaded) return;
     try { localStorage.setItem('epm_employees', JSON.stringify(employees)); } catch { /* ignore storage failures */ }
   }, [employees, employeesLoaded]);
 
@@ -139,7 +139,7 @@ export default function WorkforceApp() {
   }, [employees]);
 
   useEffect(() => {
-    if(!import.meta.env.DEV){setSitesLoaded(true);return;}
+    if(!DEMO_MODE){setSitesLoaded(true);return;}
     try {
       const saved = localStorage.getItem('epm_sites');
       if (saved) {
@@ -153,7 +153,7 @@ export default function WorkforceApp() {
   }, []);
 
   useEffect(() => {
-    if (!import.meta.env.DEV || !sitesLoaded) return;
+    if (!DEMO_MODE || !sitesLoaded) return;
     try { localStorage.setItem('epm_sites', JSON.stringify(sites)); } catch { /* ignore storage failures */ }
   }, [sites, sitesLoaded]);
 

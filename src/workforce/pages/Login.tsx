@@ -1,11 +1,11 @@
 import type { User, Lang, Employee } from '../types';
 import { makeT } from '../i18n';
-import { C, PROFILES, roleColor } from '../constants';
+import { C, DEMO_MODE, PROFILES, roleColor } from '../constants';
 import { BrandLogo } from '../components/BrandLogo';
 
 export function Login({employees,onLogin,lang,setLang}:{employees:Employee[]; onLogin:(u:User)=>void; lang:Lang; setLang:(l:Lang)=>void}) {
   const t=makeT(lang);
-  const demoMode = import.meta.env.DEV;
+  const demoMode = DEMO_MODE;
 
   return (
     <div style={{minHeight:"100vh",background:C.bg,display:"flex",alignItems:"center",justifyContent:"center",padding:16,boxSizing:"border-box",fontFamily:"inherit"}}>
@@ -25,10 +25,10 @@ export function Login({employees,onLogin,lang,setLang}:{employees:Employee[]; on
         <div style={{padding:"clamp(18px,5vw,32px)"}}>
           <div style={{fontSize:22,fontWeight:800,color:C.text,marginBottom:8}}>{demoMode?t("Development preview"):t("Secure sign-in unavailable")}</div>
           <div role="status" style={{fontSize:13,color:C.muted,lineHeight:1.55,marginBottom:demoMode?16:0}}>
-            {demoMode?t("Demo profiles are available only in local development. Production access requires server-side authentication."):t("Server-side authentication has not been configured. Employee data and app features are disabled until a secure identity provider is connected.")}
+            {demoMode?t("Public demo uses fictional data. Changes are saved only in this browser. Do not enter real employee information."):t("Server-side authentication has not been configured. Employee data and app features are disabled until a secure identity provider is connected.")}
           </div>
           {demoMode&&<>
-            <div style={{fontSize:11,color:C.muted,marginBottom:10,fontWeight:700}}>{t("DEVELOPMENT DEMO PROFILES")}</div>
+            <div style={{fontSize:11,color:C.muted,marginBottom:10,fontWeight:700}}>{t("DEMO PROFILES")}</div>
             <div style={{display:"flex",flexWrap:"wrap",gap:6}}>
               {employees.filter(e=>["e9","e1","e5","e6","e2"].includes(e.id)).map(e=>(
                 <button key={e.id} onClick={()=>onLogin(e)}

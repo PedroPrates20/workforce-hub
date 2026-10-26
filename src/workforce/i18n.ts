@@ -252,7 +252,7 @@ const PT: Record<string, string> = {
   "Enter a name and a valid e-mail address.": "Informe o nome e um endereço de e-mail válido.",
   "Development preview": "Prévia de desenvolvimento",
   "Secure sign-in unavailable": "Acesso seguro indisponível",
-  "Demo profiles are available only in local development. Production access requires server-side authentication.": "Os perfis de demonstração só estão disponíveis no ambiente local. O acesso em produção exige autenticação no servidor.",
+  "Public demo uses fictional data. Changes are saved only in this browser. Do not enter real employee information.": "A demonstração pública usa dados fictícios. As alterações são salvas somente neste navegador. Não insira dados reais de funcionários.",
   "Server-side authentication has not been configured. Employee data and app features are disabled until a secure identity provider is connected.": "A autenticação no servidor ainda não foi configurada. Os dados de funcionários e os recursos do app ficam desativados até conectar um provedor de identidade seguro.",
   "DEVELOPMENT DEMO PROFILES": "PERFIS DE DEMONSTRAÇÃO (DESENVOLVIMENTO)",
   "No sites configured": "Nenhum local configurado",

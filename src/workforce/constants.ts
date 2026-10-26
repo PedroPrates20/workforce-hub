@@ -1,6 +1,9 @@
 import { LayoutDashboard, CalendarDays, Users, MapPin, ArrowLeftRight, Package, BarChart3, FileBadge, Clock, Camera, TriangleAlert, type LucideIcon } from 'lucide-react';
 import type { Role, Tab, Employee, Site, SwapRequest, Incident, Certificate, RosterData } from './types';
 
+// Enable fictional sample data in explicitly built demo deployments as well as local development.
+export const DEMO_MODE = import.meta.env.DEV || import.meta.env.MODE === 'demo' || import.meta.env.VITE_DEMO_MODE === 'true';
+
 export const C = {
   bg: "#f4f6f9",
   header: "#1b2638",
@@ -43,7 +46,7 @@ const EXTRA_EMPLOYEE_NAMES = Array.from(
   (_, index) => `Demo Employee ${String(index + 10).padStart(3, "0")}`,
 );
 
-export const MOCK_EMPLOYEES: Employee[] = import.meta.env.DEV ? [
+export const MOCK_EMPLOYEES: Employee[] = DEMO_MODE ? [
   { id:"e1", name:"Demo Employee 001", role:"supervisor", title:"SUPERVISOR",   email:"employee001@example.com", stamp:"Stamp 4", hoursUsed:72, hoursLimit:160, holidayBalance:14, holidayEntitlement:30, site:"s1", phone:"000-000-0001", nationality:"Not specified", certExpiry:"2099-12-01", visaExpiry:"2099-08-01", active:true },
   { id:"e2", name:"Demo Employee 002", role:"cleaner",    title:"CLEANER / OP", email:"employee002@example.com", stamp:"Stamp 2", hoursUsed:36, hoursLimit:80, holidayBalance:7, holidayEntitlement:30, site:"s2", phone:"000-000-0002", nationality:"Not specified", certExpiry:"2099-09-15", visaExpiry:"2099-11-30", active:true },
   { id:"e3", name:"Demo Employee 003", role:"cleaner",    title:"CLEANER / OP", email:"employee003@example.com", stamp:"Stamp 4", hoursUsed:64, hoursLimit:160, holidayBalance:10, holidayEntitlement:30, site:"s3", phone:"000-000-0003", nationality:"Not specified", certExpiry:"2099-03-20", visaExpiry:"2099-01-15", active:true },
@@ -64,7 +67,7 @@ export const MOCK_EMPLOYEES: Employee[] = import.meta.env.DEV ? [
   })),
  ] : [];
 
-export const MOCK_SITES: Site[] = import.meta.env.DEV ? [
+export const MOCK_SITES: Site[] = DEMO_MODE ? [
   { id:"s1", name:"Demo Site 01", address:"Sample address, Ireland", client:"Sample Client 01", active:true,  postos:3 },
   { id:"s2", name:"Demo Site 02", address:"Sample address, Ireland", client:"Sample Client 02", active:true,  postos:5 },
   { id:"s3", name:"Demo Site 03", address:"Sample address, Ireland", client:"Sample Client 03", active:true,  postos:2 },
@@ -79,19 +82,19 @@ export const MOCK_SITES: Site[] = import.meta.env.DEV ? [
   })),
  ] : [];
 
-export const MOCK_SWAPS: SwapRequest[] = import.meta.env.DEV ? [
+export const MOCK_SWAPS: SwapRequest[] = DEMO_MODE ? [
   { id:"sw1", from:"e2", to:"e7", date:"2025-06-18", site:"s2", shift:"07:00–15:00", status:"pending",  reason:"Medical appointment" },
   { id:"sw2", from:"e3", to:"e4", date:"2025-06-20", site:"s3", shift:"15:00–23:00", status:"approved", reason:"Personal commitments" },
   { id:"sw3", from:"e6", to:"e2", date:"2025-06-22", site:"s1", shift:"23:00–07:00", status:"rejected", reason:"Transport issues" },
  ] : [];
 
-export const MOCK_INCIDENTS: Incident[] = import.meta.env.DEV ? [
+export const MOCK_INCIDENTS: Incident[] = DEMO_MODE ? [
   { id:"i1", reportedBy:"e6", site:"s1", date:"2025-06-15", type:"Unauthorized Access", description:"Person without badge attempted to access 3rd floor.", severity:"high" },
   { id:"i2", reportedBy:"e6", site:"s2", date:"2025-06-14", type:"Property Damage",    description:"Reception glass broken.", severity:"medium" },
   { id:"i3", reportedBy:"e3", site:"s3", date:"2025-06-13", type:"Equipment Failure",  description:"Vacuum cleaner out of order in hallway B.", severity:"low" },
  ] : [];
 
-export const MOCK_CERTS: Certificate[] = import.meta.env.DEV ? [
+export const MOCK_CERTS: Certificate[] = DEMO_MODE ? [
   { empId:"e1", name:"Demo Employee 001", type:"Safe Pass",       expiry:"2099-12-01", status:"valid" },
   { empId:"e2", name:"Demo Employee 002", type:"Manual Handling", expiry:"2099-09-15", status:"valid" },
   { empId:"e4", name:"Demo Employee 004", type:"Safe Pass",       expiry:"2099-08-30", status:"valid" },
