@@ -324,8 +324,8 @@ export function EmailPreviewModal({ onClose, employeeRoleFilter = 'all' }: { onC
     : t("All employees with shifts ({n})", { n: recipients.length });
   const noun = recipients.length === 1 ? t("employee") : t("employees");
 
-  // Real, working action: opens the user's e-mail app with this roster pre-filled.
-  const mailto = (() => {
+  // Open a browser-based Gmail compose window so sending works even when no desktop mail app is configured.
+  const emailBody = (() => {
     if (!current) return "";
     const lines = current.days.flatMap(({ date, shifts }) =>
       shifts.length === 0
@@ -338,8 +338,15 @@ export function EmailPreviewModal({ onClose, employeeRoleFilter = 'all' }: { onC
       t("Total: {n} shifts · {h}", { n: current.count, h: fmtH(current.hours) }), "",
       t("Kind regards,"), user.name, "Workforce Hub",
     ].join("\n");
-    return `mailto:${current.emp.email}?subject=${encodeURIComponent(t("Your shift roster · {period}", { period }))}&body=${encodeURIComponent(body)}`;
+    return body;
   })();
+  const emailSubject = t("Your shift roster · {period}", { period });
+  const gmailCompose = current
+    ? `https://mail.google.com/mail/?${new URLSearchParams({ view: "cm", fs: "1", to: current.emp.email, su: emailSubject, body: emailBody }).toString()}`
+    : "";
+  const mailto = current
+    ? `mailto:${encodeURIComponent(current.emp.email)}?${new URLSearchParams({ subject: emailSubject, body: emailBody }).toString()}`
+    : "";
 
   const modeBtn = (m: "employee" | "team", label: string) => (
     <button onClick={() => { setMode(m); setSent(false); }}
@@ -447,13 +454,18 @@ export function EmailPreviewModal({ onClose, employeeRoleFilter = 'all' }: { onC
                 {sent
                   ? t("Queued for {n} {noun} — demo only, no e-mail server is connected yet.", { n: recipients.length, noun })
                   : mode === "employee"
-                    ? t("Review the e-mail, then send. Use “Open in e-mail app” to send this one for real right now.")
+                    ? t("Review the e-mail, then open Gmail or your default e-mail app to send it.")
                     : t("Review the e-mail, then send.")}
               </div>
               {mode === "employee" && (
-                <a href={mailto} style={{ flex: isMobile ? 1 : undefined, textAlign: "center", textDecoration: "none", background: "transparent", color: C.text, border: `1px solid ${C.border}`, borderRadius: 7, padding: "11px 16px", fontWeight: 700, fontSize: 13, fontFamily: "inherit" }}>
-                  {t("Open in e-mail app")}
-                </a>
+                <>
+                  <a href={gmailCompose} target="_blank" rel="noopener noreferrer" style={{ flex: isMobile ? 1 : undefined, textAlign: "center", textDecoration: "none", background: C.gold, color: "#fff", border: `1px solid ${C.gold}`, borderRadius: 7, padding: "11px 16px", fontWeight: 700, fontSize: 13, fontFamily: "inherit" }}>
+                    {t("Open Gmail to send")}
+                  </a>
+                  <a href={mailto} style={{ flex: isMobile ? 1 : undefined, textAlign: "center", textDecoration: "none", background: "transparent", color: C.text, border: `1px solid ${C.border}`, borderRadius: 7, padding: "11px 16px", fontWeight: 700, fontSize: 13, fontFamily: "inherit" }}>
+                    {t("Use default e-mail app")}
+                  </a>
+                </>
               )}
               <button onClick={() => setSent(true)} disabled={sent}
                 style={{ flex: isMobile ? 1 : undefined, background: sent ? C.green : C.gold, color: "#fff", border: "none", borderRadius: 7, padding: "11px 18px", fontWeight: 700, fontSize: 13, cursor: sent ? "default" : "pointer", fontFamily: "inherit" }}>

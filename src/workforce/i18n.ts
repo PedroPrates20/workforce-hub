@@ -502,9 +502,11 @@ const PT: Record<string, string> = {
   "employee": "funcionário",
   "employees": "funcionários",
   "✓ Queued for {n} {noun} — demo only, no e-mail server is connected yet.": "✓ Na fila para {n} {noun} — apenas demonstração, nenhum servidor de e-mail conectado ainda.",
-  "Review the e-mail, then send. Use “Open in e-mail app” to send this one for real right now.": "Revise o e-mail e depois envie. Use “Abrir no app de e-mail” para enviar este de verdade agora.",
+  "Review the e-mail, then open Gmail or your default e-mail app to send it.": "Revise o e-mail e abra o Gmail ou o app de e-mail padrão para enviá-lo.",
   "Review the e-mail, then send.": "Revise o e-mail e depois envie.",
   "Open in e-mail app": "Abrir no app de e-mail",
+  "Open Gmail to send": "Abrir o Gmail para enviar",
+  "Use default e-mail app": "Usar o app de e-mail padrão",
   "Sent ✓": "Enviado ✓",
   "Send to {n} {noun}": "Enviar para {n} {noun}",
   "Plan and manage employee shifts": "Planeje e gerencie os turnos dos funcionários",
@@ -570,8 +572,8 @@ const RO_EXTRA2: Record<string, string> = {
   "CLEANER / OP":"CURĂȚENIE / OPERAȚIUNI","SECURITY":"SECURITATE","SUPERVISOR":"SUPERVIZOR","HR MANAGER":"MANAGER RESURSE UMANE","DIRECTOR / ADMIN":"DIRECTOR / ADMINISTRATOR","DIRECTOR":"DIRECTOR","Manual Handling":"Manipularea manuală a greutăților","HACCP":"HACCP","Portuguese":"Portughez(ă)","Brazilian":"Brazilian(ă)","Irish":"Irlandez(ă)","Stamp 2":"Stamp 2","Stamp 4":"Stamp 4","Medical appointment":"Programare medicală","Personal commitments":"Angajamente personale","Transport issues":"Probleme de transport"
 };
 
-const RU_EXTRA3: Record<string, string> = { "Applied filters": "Применённые фильтры", "Generate PDF": "Создать PDF" };
-const RO_EXTRA3: Record<string, string> = { "Applied filters": "Filtre aplicate", "Generate PDF": "Generează PDF" };
+const RU_EXTRA3: Record<string, string> = { "Applied filters": "Применённые фильтры", "Generate PDF": "Создать PDF", "Open Gmail to send": "Открыть Gmail для отправки", "Use default e-mail app": "Открыть приложение электронной почты по умолчанию", "Review the e-mail, then open Gmail or your default e-mail app to send it.": "Проверьте письмо и откройте Gmail или приложение электронной почты по умолчанию, чтобы отправить его." };
+const RO_EXTRA3: Record<string, string> = { "Applied filters": "Filtre aplicate", "Generate PDF": "Generează PDF", "Open Gmail to send": "Deschide Gmail pentru a trimite", "Use default e-mail app": "Folosește aplicația de e-mail implicită", "Review the e-mail, then open Gmail or your default e-mail app to send it.": "Verifică e-mailul, apoi deschide Gmail sau aplicația de e-mail implicită pentru a-l trimite." };
 const RU_EXTRA4: Record<string, string> = {
   "Supply Requests":"Запросы материалов","Request supplies for your work site":"Запросить материалы для объекта","New supply request":"Новый запрос материалов","Select a site":"Выберите объект","Supply item":"Запрашиваемый материал","Enter the item name":"Укажите название материала","Quantity":"Количество","Details (optional)":"Подробности (необязательно)","Add details about the request":"Добавьте подробности запроса","Submit supply request":"Отправить запрос материалов","Supply request submitted.":"Запрос материалов отправлен.","Supply requests":"Запросы материалов","My supply requests":"Мои запросы материалов","Approve supply request":"Одобрить запрос материалов","Reject supply request":"Отклонить запрос материалов","Approve":"Одобрить","Reject":"Отклонить","Cleaning supplies":"Средства для уборки","Security equipment":"Оборудование охраны","PPE":"Средства индивидуальной защиты","Other":"Другое","Enter an item, a site, and a quantity from 1 to 999.":"Укажите материал, объект и количество от 1 до 999.","No supply requests yet.":"Запросов материалов пока нет."
 };
