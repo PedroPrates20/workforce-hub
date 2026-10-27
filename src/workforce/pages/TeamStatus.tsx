@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { UserPlus } from 'lucide-react';
 import type { Employee, Role } from '../types';
 import { Card } from '../components/Card';
 import { Badge } from '../components/Badge';
@@ -6,7 +7,7 @@ import { C, PROFILES, initials, roleColor } from '../constants';
 import { useApp, useI18n } from '../context/AppContext';
 
 type Filter = 'all' | Role;
-type Confirmation = { type:'save'|'delete'; employeeId:string } | null;
+type Confirmation = { type:'save'|'add'|'delete'; employeeId:string } | null;
 const roleFilters: { value:Filter; label:string; color:string }[] = [
   {value:'all',label:'All',color:C.gold},
   {value:'cleaner',label:'Operational',color:C.blue},
@@ -24,22 +25,32 @@ export function TeamStatus() {
   const [filter,setFilter]=useState<Filter>('all');
   const [expanded,setExpanded]=useState<string|null>(null);
   const [draft,setDraft]=useState<Employee|null>(null);
+  const [isNewDraft,setIsNewDraft]=useState(false);
   const [confirmation,setConfirmation]=useState<Confirmation>(null);
   const [formError,setFormError]=useState('');
   const emps=filter==='all'?employees:employees.filter(employee=>employee.role===filter);
 
   const updateDraft=<K extends keyof Employee>(key:K,value:Employee[K])=>setDraft(current=>current?{...current,[key]:value}:current);
-  const beginEdit=(employee:Employee)=>{setDraft({...employee});setFormError('');};
+  const beginEdit=(employee:Employee)=>{setDraft({...employee});setIsNewDraft(false);setFormError('');};
+  const beginAdd=()=>{
+    const role:Role=filter==='all'?'cleaner':filter;
+    setDraft({id:globalThis.crypto?.randomUUID?.()??`employee-${Date.now()}-${Math.random().toString(36).slice(2,8)}`,name:'',role,title:PROFILES[role].title,email:'',stamp:null,hoursUsed:0,hoursLimit:160,holidayBalance:30,holidayEntitlement:30,site:sites.find(site=>site.active)?.id??sites[0]?.id??'',phone:'',address:'',contractStart:'',nationality:'',certExpiry:'',visaExpiry:'',active:true});
+    setIsNewDraft(true);setFormError('');
+  };
   const confirmAction=()=>{
     if(!confirmation)return;
     const {type,employeeId}=confirmation;
-    if(type==='save'&&draft){
-      if(!draft.name.trim()||!draft.email.trim()||!/^\S+@\S+\.\S+$/.test(draft.email.trim())){setFormError(t('Enter a name and a valid e-mail address.'));setConfirmation(null);return;}
+    if((type==='save'||type==='add')&&draft){
+      const email=draft.email.trim();
+      if(!draft.name.trim()||!email||!/^\S+@\S+\.\S+$/.test(email)){setFormError(t('Enter a name and a valid e-mail address.'));setConfirmation(null);return;}
+      if(employees.some(employee=>employee.id!==draft.id&&employee.email.trim().toLowerCase()===email.toLowerCase())){setFormError(t('An employee with this e-mail address already exists.'));setConfirmation(null);return;}
       const entitlement=draft.holidayEntitlement??30;
       if(entitlement<0||draft.holidayBalance<0||draft.holidayBalance>entitlement){setFormError(t('Holiday balance must be between zero and the annual allowance.'));setConfirmation(null);return;}
-      const updated={...draft,holidayEntitlement:entitlement,name:draft.name.trim(),email:draft.email.trim(),phone:draft.phone.trim(),address:draft.address?.trim()||'',nationality:draft.nationality.trim()};
-      setEmployees(current=>current.map(employee=>employee.id===employeeId?updated:employee));
-      setDraft(null);setExpanded(employeeId);
+      if(draft.hoursUsed<0||draft.hoursLimit<0||!Number.isFinite(draft.hoursUsed)||!Number.isFinite(draft.hoursLimit)){setFormError(t('Hours and holiday allowance must be zero or greater.'));setConfirmation(null);return;}
+      const updated={...draft,title:PROFILES[draft.role].title,holidayEntitlement:entitlement,name:draft.name.trim(),email,phone:draft.phone.trim(),address:draft.address?.trim()||'',nationality:draft.nationality.trim()};
+      if(type==='add'){setEmployees(current=>[...current,updated]);setFilter('all');}
+      else setEmployees(current=>current.map(employee=>employee.id===employeeId?updated:employee));
+      setDraft(null);setIsNewDraft(false);setExpanded(employeeId);
     }else if(type==='delete'){
       setEmployees(current=>current.filter(employee=>employee.id!==employeeId));
       setRoster(current=>Object.fromEntries(Object.entries(current).map(([day,daySites])=>[day,Object.fromEntries(Object.entries(daySites).map(([siteId,slots])=>[siteId,slots.filter(slot=>slot.empId!==employeeId)])).filter(([,slots])=>slots.length>0)]).filter(([,daySites])=>Object.keys(daySites).length>0)));
@@ -64,7 +75,10 @@ export function TeamStatus() {
 
   return (
     <div className="workforce-page" style={{padding:24}}>
-      <div style={{fontSize:20,fontWeight:800,color:C.text,marginBottom:4}}>{t('Team Status & Compliance')}</div>
+      <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',gap:12,flexWrap:'wrap',marginBottom:4}}>
+        <div style={{fontSize:20,fontWeight:800,color:C.text}}>{t('Team Status & Compliance')}</div>
+        <button onClick={beginAdd} style={{display:'inline-flex',alignItems:'center',gap:7,padding:'9px 13px',borderRadius:7,border:0,background:C.gold,color:'#fff',fontSize:12,fontWeight:700,cursor:'pointer',fontFamily:'inherit'}}><UserPlus size={15}/>{t('Add employee')}</button>
+      </div>
       <div style={{fontSize:12,color:C.muted,marginBottom:20}}>{t('Monitoring hours, visas, and alerts')} · {employees.length} {t('employees')}</div>
 
       <div style={{display:'flex',gap:8,marginBottom:20,flexWrap:'wrap'}}>
@@ -107,8 +121,8 @@ export function TeamStatus() {
       </div>
 
       {draft&&<div role="presentation" onMouseDown={event=>{if(event.target===event.currentTarget){setDraft(null);setFormError('');}}} style={{position:'fixed',inset:0,zIndex:1200,background:'rgba(15,27,45,.5)',display:'flex',alignItems:'center',justifyContent:'center',padding:16}}>
-        <form role="dialog" aria-modal="true" aria-labelledby="employee-edit-title" onSubmit={event=>{event.preventDefault();setFormError('');setConfirmation({type:'save',employeeId:draft.id});}} style={{width:'100%',maxWidth:680,maxHeight:'92vh',overflowY:'auto',background:C.card,border:`1px solid ${C.border}`,borderRadius:12,padding:20,boxShadow:'0 16px 48px rgba(0,0,0,.2)'}}>
-          <div id="employee-edit-title" style={{fontSize:17,fontWeight:800,color:C.text,marginBottom:4}}>{t('Edit employee')}</div><div style={{fontSize:12,color:C.muted,marginBottom:14}}>{draft.name}</div>
+        <form role="dialog" aria-modal="true" aria-labelledby="employee-edit-title" onSubmit={event=>{event.preventDefault();setFormError('');setConfirmation({type:isNewDraft?'add':'save',employeeId:draft.id});}} style={{width:'100%',maxWidth:680,maxHeight:'92vh',overflowY:'auto',background:C.card,border:`1px solid ${C.border}`,borderRadius:12,padding:20,boxShadow:'0 16px 48px rgba(0,0,0,.2)'}}>
+          <div id="employee-edit-title" style={{fontSize:17,fontWeight:800,color:C.text,marginBottom:4}}>{t(isNewDraft?'Add new employee':'Edit employee')}</div><div style={{fontSize:12,color:C.muted,marginBottom:14}}>{draft.name||t('Enter employee details')}</div>
           <div style={{display:'flex',flexDirection:'column',gap:12}}>
             <div style={{fontSize:12,fontWeight:800,color:C.text}}>{t('Personal information')}</div>
             <div className="workforce-stack" style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10}}>
@@ -121,7 +135,7 @@ export function TeamStatus() {
             <div style={{fontSize:12,fontWeight:800,color:C.text,marginTop:4}}>{t('Employment information')}</div>
             <div className="workforce-stack" style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10}}>
               {field('Contract start date',draft.contractStart||'',value=>updateDraft('contractStart',value),'date')}
-              <label style={{fontSize:11,color:C.muted}}>{t('Site')}<select value={draft.site} onChange={event=>updateDraft('site',event.target.value)} style={{...inputStyle,marginTop:5}}>{sites.map(site=><option key={site.id} value={site.id}>{site.name}</option>)}</select></label>
+              <label style={{fontSize:11,color:C.muted}}>{t('Site')}<select value={draft.site} onChange={event=>updateDraft('site',event.target.value)} style={{...inputStyle,marginTop:5}}><option value="">{t('Not assigned')}</option>{sites.map(site=><option key={site.id} value={site.id}>{site.name}</option>)}</select></label>
               <label style={{fontSize:11,color:C.muted}}>{t('Role')}<select value={draft.role} onChange={event=>updateDraft('role',event.target.value as Role)} style={{...inputStyle,marginTop:5}}>{Object.entries(PROFILES).map(([role,profile])=><option key={role} value={role}>{t(profile.title)}</option>)}</select></label>
               <label style={{fontSize:11,color:C.muted}}>{t('Status')}<select value={draft.active?'active':'inactive'} onChange={event=>updateDraft('active',event.target.value==='active')} style={{...inputStyle,marginTop:5}}><option value="active">{t('Active')}</option><option value="inactive">{t('Inactive')}</option></select></label>
             </div>
@@ -137,15 +151,15 @@ export function TeamStatus() {
             <div className="workforce-stack" style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10}}>{field('Visa expiry',draft.visaExpiry,value=>updateDraft('visaExpiry',value),'date')}{field('Certificate expiry',draft.certExpiry,value=>updateDraft('certExpiry',value),'date')}</div>
           </div>
           {formError&&<div role="alert" style={{color:C.red,fontSize:12,marginTop:12}}>{formError}</div>}
-          <div style={{display:'flex',justifyContent:'flex-end',gap:8,marginTop:16}}><button type="button" onClick={()=>{setDraft(null);setFormError('');}} style={{padding:'8px 14px',borderRadius:7,border:`1px solid ${C.border}`,background:'transparent',color:C.muted,fontSize:12,cursor:'pointer',fontFamily:'inherit'}}>{t('Cancel')}</button><button type="submit" style={{padding:'8px 14px',borderRadius:7,border:0,background:C.gold,color:'#fff',fontSize:12,fontWeight:700,cursor:'pointer',fontFamily:'inherit'}}>{t('Review and confirm')}</button></div>
+          <div style={{display:'flex',justifyContent:'flex-end',gap:8,marginTop:16}}><button type="button" onClick={()=>{setDraft(null);setIsNewDraft(false);setFormError('');}} style={{padding:'8px 14px',borderRadius:7,border:`1px solid ${C.border}`,background:'transparent',color:C.muted,fontSize:12,cursor:'pointer',fontFamily:'inherit'}}>{t('Cancel')}</button><button type="submit" style={{padding:'8px 14px',borderRadius:7,border:0,background:C.gold,color:'#fff',fontSize:12,fontWeight:700,cursor:'pointer',fontFamily:'inherit'}}>{t('Review and confirm')}</button></div>
         </form>
       </div>}
 
       {confirmation&&<div role="presentation" style={{position:'fixed',inset:0,zIndex:1300,background:'rgba(15,27,45,.6)',display:'flex',alignItems:'center',justifyContent:'center',padding:16}}>
         <div role="alertdialog" aria-modal="true" aria-labelledby="employee-confirm-title" style={{width:'100%',maxWidth:400,background:C.card,border:`1px solid ${C.border}`,borderRadius:12,padding:20,boxShadow:'0 16px 48px rgba(0,0,0,.25)'}}>
-          <div id="employee-confirm-title" style={{fontSize:16,fontWeight:800,color:C.text,marginBottom:8}}>{t(confirmation.type==='delete'?'Confirm employee deletion':'Confirm employee changes')}</div>
-          <div style={{fontSize:13,color:C.muted,lineHeight:1.5}}>{t(confirmation.type==='delete'?'This will permanently remove the employee and their assigned shifts.':'Review the employee details before saving these changes.')}</div>
-          <div style={{display:'flex',justifyContent:'flex-end',gap:8,marginTop:18}}><button onClick={()=>setConfirmation(null)} style={{padding:'8px 14px',borderRadius:7,border:`1px solid ${C.border}`,background:'transparent',color:C.muted,fontSize:12,cursor:'pointer',fontFamily:'inherit'}}>{t('Go back')}</button><button onClick={confirmAction} style={{padding:'8px 14px',borderRadius:7,border:0,background:confirmation.type==='delete'?C.red:C.gold,color:'#fff',fontSize:12,fontWeight:700,cursor:'pointer',fontFamily:'inherit'}}>{t(confirmation.type==='delete'?'Confirm deletion':'Confirm and save')}</button></div>
+          <div id="employee-confirm-title" style={{fontSize:16,fontWeight:800,color:C.text,marginBottom:8}}>{t(confirmation.type==='delete'?'Confirm employee deletion':confirmation.type==='add'?'Confirm new employee':'Confirm employee changes')}</div>
+          <div style={{fontSize:13,color:C.muted,lineHeight:1.5}}>{t(confirmation.type==='delete'?'This will permanently remove the employee and their assigned shifts.':confirmation.type==='add'?'Review the employee details before adding this employee.':'Review the employee details before saving these changes.')}</div>
+          <div style={{display:'flex',justifyContent:'flex-end',gap:8,marginTop:18}}><button onClick={()=>setConfirmation(null)} style={{padding:'8px 14px',borderRadius:7,border:`1px solid ${C.border}`,background:'transparent',color:C.muted,fontSize:12,cursor:'pointer',fontFamily:'inherit'}}>{t('Go back')}</button><button onClick={confirmAction} style={{padding:'8px 14px',borderRadius:7,border:0,background:confirmation.type==='delete'?C.red:C.gold,color:'#fff',fontSize:12,fontWeight:700,cursor:'pointer',fontFamily:'inherit'}}>{t(confirmation.type==='delete'?'Confirm deletion':confirmation.type==='add'?'Confirm and add':'Confirm and save')}</button></div>
         </div>
       </div>}
     </div>

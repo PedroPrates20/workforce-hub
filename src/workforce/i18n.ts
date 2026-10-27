@@ -218,6 +218,15 @@ const PT: Record<string, string> = {
   "✓ Confirm shift": "✓ Confirmar turno",
   "Select an employee": "Selecione um funcionário",
   "Team Status & Compliance": "Status da Equipe e Conformidade",
+  "Add employee": "Adicionar funcionário",
+  "Add new employee": "Adicionar novo funcionário",
+  "Confirm new employee": "Confirmar novo funcionário",
+  "Confirm and add": "Confirmar e adicionar",
+  "Enter employee details": "Informe os dados do funcionário",
+  "Review the employee details before adding this employee.": "Confira os dados do funcionário antes de adicioná-lo.",
+  "An employee with this e-mail address already exists.": "Já existe um funcionário com este endereço de e-mail.",
+  "Hours and holiday allowance must be zero or greater.": "As horas e o direito de férias devem ser iguais ou maiores que zero.",
+  "Not assigned": "Não atribuído",
   "View more information": "Ver mais informações",
   "Show less": "Mostrar menos",
   "Personal information": "Informações pessoais",
@@ -545,6 +554,7 @@ const RO_EXTRA: Record<string, string> = {
 const RU_EXTRA2: Record<string, string> = {
   "Coverage is an estimate of assigned shifts against active posts for the displayed roster period.":"Покрытие — это оценка назначенных смен относительно активных постов за указанный период графика.",
   "days used":"дней использовано","Sites":"Объекты","WRC working hours guidance":"Рекомендации WRC по рабочему времени",
+  "Add employee":"Добавить сотрудника","Add new employee":"Добавить нового сотрудника","Confirm new employee":"Подтвердить нового сотрудника","Confirm and add":"Подтвердить и добавить","Enter employee details":"Введите данные сотрудника","Review the employee details before adding this employee.":"Проверьте данные сотрудника перед добавлением.","An employee with this e-mail address already exists.":"Сотрудник с таким адресом электронной почты уже существует.","Hours and holiday allowance must be zero or greater.":"Количество часов и отпускных дней должно быть не меньше нуля.","Not assigned":"Не назначено",
   "OWTA checks normally review net working hours across the applicable reference period. In Ireland, the general limit is an average 48-hour week over four months, with exceptions. These app totals do not contain that history and do not determine compliance. Pay amounts are omitted because hourly rates are not configured.":"Проверка OWTA обычно учитывает чистое рабочее время за соответствующий период. В Ирландии общий лимит составляет в среднем 48 часов в неделю за четыре месяца, с исключениями. Итоги приложения не содержат такую историю и не подтверждают соблюдение требований. Суммы оплаты не указаны, так как почасовые ставки не настроены.",
   "This summary shows permission records stored in the app. Verify the current permission and applicable conditions before making work or immigration decisions.":"В сводке показаны разрешения, сохранённые в приложении. Проверьте актуальное разрешение и условия перед принятием решений о работе или иммиграции.",
   "CLEANER / OP":"УБОРКА / ОПЕРАЦИИ","SECURITY":"ОХРАНА","SUPERVISOR":"СУПЕРВИЗОР","HR MANAGER":"МЕНЕДЖЕР ПО ПЕРСОНАЛУ","DIRECTOR / ADMIN":"ДИРЕКТОР / АДМИНИСТРАТОР","DIRECTOR":"ДИРЕКТОР","Manual Handling":"Ручная обработка грузов","HACCP":"HACCP","Portuguese":"Португалец / португалка","Brazilian":"Бразилец / бразильянка","Irish":"Ирландец / ирландка","Stamp 2":"Stamp 2","Stamp 4":"Stamp 4","Medical appointment":"Приём у врача","Personal commitments":"Личные обстоятельства","Transport issues":"Проблемы с транспортом"
@@ -553,6 +563,7 @@ const RU_EXTRA2: Record<string, string> = {
 const RO_EXTRA2: Record<string, string> = {
   "Coverage is an estimate of assigned shifts against active posts for the displayed roster period.":"Acoperirea este o estimare a turelor atribuite în raport cu posturile active pentru perioada afișată.",
   "days used":"zile utilizate","Sites":"Locații","WRC working hours guidance":"Ghidul WRC privind timpul de lucru",
+  "Add employee":"Adaugă angajat","Add new employee":"Adaugă un angajat nou","Confirm new employee":"Confirmă angajatul nou","Confirm and add":"Confirmă și adaugă","Enter employee details":"Introdu datele angajatului","Review the employee details before adding this employee.":"Verifică datele angajatului înainte de a-l adăuga.","An employee with this e-mail address already exists.":"Există deja un angajat cu această adresă de e-mail.","Hours and holiday allowance must be zero or greater.":"Orele și numărul de zile de concediu trebuie să fie zero sau mai mari.","Not assigned":"Neatribuit",
   "Enter a name and a valid e-mail address.":"Introdu un nume și o adresă de e-mail validă.",
   "OWTA checks normally review net working hours across the applicable reference period. In Ireland, the general limit is an average 48-hour week over four months, with exceptions. These app totals do not contain that history and do not determine compliance. Pay amounts are omitted because hourly rates are not configured.":"Verificările OWTA analizează de regulă timpul net de lucru în perioada de referință aplicabilă. În Irlanda, limita generală este o medie de 48 de ore pe săptămână pe parcursul a patru luni, cu excepții. Totalurile aplicației nu includ acest istoric și nu determină conformitatea. Sumele salariale nu sunt afișate deoarece tarifele orare nu sunt configurate.",
   "This summary shows permission records stored in the app. Verify the current permission and applicable conditions before making work or immigration decisions.":"Acest rezumat afișează permisele înregistrate în aplicație. Verifică permisul actual și condițiile aplicabile înainte de a lua decizii privind munca sau imigrarea.",
