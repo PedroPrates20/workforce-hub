@@ -296,6 +296,7 @@ export function EmailPreviewModal({ onClose, employeeRoleFilter = 'all' }: { onC
   const [mode, setMode] = useState<"employee" | "team">("employee");
   const [selId, setSelId] = useState<string | null>(null);
   const [sent, setSent] = useState(false);
+  const [clipboardStatus, setClipboardStatus] = useState<"copied" | "failed" | null>(null);
 
   useEffect(() => {
     const h = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
@@ -342,14 +343,30 @@ export function EmailPreviewModal({ onClose, employeeRoleFilter = 'all' }: { onC
   })();
   const emailSubject = t("Your shift roster · {period}", { period });
   const gmailCompose = current
-    ? `https://mail.google.com/mail/?${new URLSearchParams({ view: "cm", fs: "1", to: current.emp.email, su: emailSubject, body: emailBody }).toString()}`
+    ? `https://mail.google.com/mail/?${new URLSearchParams({ view: "cm", fs: "1", to: current.emp.email, su: emailSubject }).toString()}`
     : "";
   const mailto = current
     ? `mailto:${encodeURIComponent(current.emp.email)}?${new URLSearchParams({ subject: emailSubject, body: emailBody }).toString()}`
     : "";
+  const openStyledGmailDraft = async () => {
+    setClipboardStatus(null);
+    window.open(gmailCompose, "_blank", "noopener,noreferrer");
+    try {
+      const previewBody = document.getElementById("roster-email-html-body");
+      if (!previewBody || !navigator.clipboard?.write || typeof ClipboardItem === "undefined") throw new Error("clipboard unavailable");
+      const html = `<!doctype html><html><body style="margin:0;font-family:Arial,Helvetica,sans-serif">${previewBody.outerHTML}</body></html>`;
+      await navigator.clipboard.write([new ClipboardItem({
+        "text/html": new Blob([html], { type: "text/html" }),
+        "text/plain": new Blob([emailBody], { type: "text/plain" }),
+      })]);
+      setClipboardStatus("copied");
+    } catch {
+      setClipboardStatus("failed");
+    }
+  };
 
   const modeBtn = (m: "employee" | "team", label: string) => (
-    <button onClick={() => { setMode(m); setSent(false); }}
+    <button onClick={() => { setMode(m); setSent(false); setClipboardStatus(null); }}
       style={{ flex: 1, padding: isMobile ? "9px 8px" : "7px 8px", borderRadius: 7, cursor: "pointer", fontFamily: "inherit", fontSize: 12, fontWeight: 700,
         border: `1.5px solid ${mode === m ? C.gold : C.border}`, background: mode === m ? `${C.gold}18` : "transparent", color: mode === m ? C.gold : C.muted }}>
       {label}
@@ -394,7 +411,7 @@ export function EmailPreviewModal({ onClose, employeeRoleFilter = 'all' }: { onC
                         const active = r.emp.id === current.emp.id;
                         const over = r.emp.stamp !== null && r.emp.hoursUsed + r.hours > r.emp.hoursLimit;
                         return (
-                          <button key={r.emp.id} onClick={() => { setSelId(r.emp.id); setSent(false); }}
+                          <button key={r.emp.id} onClick={() => { setSelId(r.emp.id); setSent(false); setClipboardStatus(null); }}
                             style={{ flexShrink: 0, display: "flex", alignItems: "center", gap: 8, padding: "6px 12px 6px 6px", borderRadius: 99, cursor: "pointer", fontFamily: "inherit",
                               border: `1px solid ${active ? C.gold : C.border}`, background: active ? `${C.gold}18` : "transparent", color: C.text, fontSize: 13, fontWeight: 600 }}>
                             <span style={{ width: 28, height: 28, borderRadius: "50%", background: roleColor(r.emp.role), color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10, fontWeight: 800 }}>{initials(r.emp.name)}</span>
@@ -411,7 +428,7 @@ export function EmailPreviewModal({ onClose, employeeRoleFilter = 'all' }: { onC
                           const active = r.emp.id === current.emp.id;
                           const over = r.emp.stamp !== null && r.emp.hoursUsed + r.hours > r.emp.hoursLimit;
                           return (
-                            <button key={r.emp.id} onClick={() => { setSelId(r.emp.id); setSent(false); }}
+                            <button key={r.emp.id} onClick={() => { setSelId(r.emp.id); setSent(false); setClipboardStatus(null); }}
                               style={{ width: "100%", display: "flex", alignItems: "center", gap: 10, padding: "8px 10px", marginBottom: 4, borderRadius: 8, cursor: "pointer", fontFamily: "inherit", textAlign: "left",
                                 border: `1px solid ${active ? C.gold : "transparent"}`, background: active ? `${C.gold}18` : "transparent" }}>
                               <div style={{ width: 32, height: 32, borderRadius: "50%", background: roleColor(r.emp.role), color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: 800, flexShrink: 0 }}>{initials(r.emp.name)}</div>
@@ -442,7 +459,7 @@ export function EmailPreviewModal({ onClose, employeeRoleFilter = 'all' }: { onC
                     <div><b style={{ color: "#374151" }}>{t("Subject:")}</b> {subject}</div>
                   </div>
                   {mode === "employee"
-                    ? <EmployeeEmail emp={current.emp} days={current.days} count={current.count} hours={current.hours} sender={user.name} />
+                    ? <div id="roster-email-html-body"><EmployeeEmail emp={current.emp} days={current.days} count={current.count} hours={current.hours} sender={user.name} /></div>
                     : <TeamEmail roster={roster} sender={user.name} employeeRoleFilter={employeeRoleFilter} />}
                 </div>
               </div>
@@ -451,17 +468,21 @@ export function EmailPreviewModal({ onClose, employeeRoleFilter = 'all' }: { onC
             {/* footer actions */}
             <div style={{ padding: "12px 16px", borderTop: `1px solid ${C.border}`, display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap", flexShrink: 0 }}>
               <div style={{ flex: isMobile ? "1 1 100%" : 1, fontSize: 12, color: sent ? C.green : C.muted }}>
-                {sent
+                {clipboardStatus === "copied"
+                  ? t("Formatted roster copied. In Gmail, click the message body and press Ctrl+V.")
+                  : clipboardStatus === "failed"
+                    ? t("Gmail opened, but formatting could not be copied. Copy the preview and paste it into the message body.")
+                    : sent
                   ? t("Queued for {n} {noun} — demo only, no e-mail server is connected yet.", { n: recipients.length, noun })
                   : mode === "employee"
-                    ? t("Review the e-mail, then open Gmail or your default e-mail app to send it.")
+                    ? t("Review the e-mail, open Gmail, then paste the formatted roster into the message body.")
                     : t("Review the e-mail, then send.")}
               </div>
               {mode === "employee" && (
                 <>
-                  <a href={gmailCompose} target="_blank" rel="noopener noreferrer" style={{ flex: isMobile ? 1 : undefined, textAlign: "center", textDecoration: "none", background: C.gold, color: "#fff", border: `1px solid ${C.gold}`, borderRadius: 7, padding: "11px 16px", fontWeight: 700, fontSize: 13, fontFamily: "inherit" }}>
-                    {t("Open Gmail to send")}
-                  </a>
+                  <button type="button" onClick={() => void openStyledGmailDraft()} style={{ flex: isMobile ? 1 : undefined, textAlign: "center", textDecoration: "none", background: C.gold, color: "#fff", border: `1px solid ${C.gold}`, borderRadius: 7, padding: "11px 16px", fontWeight: 700, fontSize: 13, fontFamily: "inherit", cursor: "pointer" }}>
+                    {t("Open Gmail & paste roster")}
+                  </button>
                   <a href={mailto} style={{ flex: isMobile ? 1 : undefined, textAlign: "center", textDecoration: "none", background: "transparent", color: C.text, border: `1px solid ${C.border}`, borderRadius: 7, padding: "11px 16px", fontWeight: 700, fontSize: 13, fontFamily: "inherit" }}>
                     {t("Use default e-mail app")}
                   </a>
