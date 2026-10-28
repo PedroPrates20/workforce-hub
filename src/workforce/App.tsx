@@ -32,6 +32,31 @@ const TAB_COMPONENTS: Record<Tab, () => React.ReactElement> = {
   incidents: Incidents,
 };
 
+const fictionalizeEmployees = (stored: Employee[]) => stored.map((employee, index) => {
+  const sample = MOCK_EMPLOYEES.find(item => item.id === employee.id);
+  const number = String(index + 1).padStart(3, "0");
+  return {
+    ...employee,
+    name: sample?.name ?? `Fictional Staff ${number}`,
+    email: sample?.email ?? `demo-staff-${number}@example.com`,
+    phone: sample?.phone ?? "000-000-0000",
+    address: "Sample address, Ireland",
+    nationality: "Not specified",
+  };
+});
+
+const fictionalizeSites = (stored: Site[]) => stored.map((site, index) => {
+  const sample = MOCK_SITES.find(item => item.id === site.id);
+  const number = String(index + 1).padStart(2, "0");
+  const { latitude: _latitude, longitude: _longitude, geofenceRadius: _radius, buildingManagerPhone: _phone, ...siteWithoutRealLocation } = site;
+  return {
+    ...siteWithoutRealLocation,
+    name: sample?.name ?? `Example Site ${number}`,
+    address: sample?.address ?? `Sample District ${number}, Ireland`,
+    client: sample?.client ?? `Example Property Group ${number}`,
+  };
+});
+
 export default function WorkforceApp() {
   const [user, setUser] = useState<User | null>(null);
   const [lang, setLangState] = useState<Lang>("en");
@@ -122,7 +147,7 @@ export default function WorkforceApp() {
       if (saved) {
         const parsed: unknown = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.every(employee => employee && typeof employee.id === 'string' && typeof employee.name === 'string' && typeof employee.email === 'string')) {
-          setEmployees((parsed as Employee[]).map(employee=>({...employee,holidayEntitlement:employee.holidayEntitlement??30})));
+          setEmployees(fictionalizeEmployees(parsed as Employee[]).map(employee=>({...employee,holidayEntitlement:employee.holidayEntitlement??30})));
         }
       }
     } catch { /* ignore invalid employee data */ }
@@ -145,7 +170,7 @@ export default function WorkforceApp() {
       if (saved) {
         const parsed: unknown = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.every(site => site && typeof site.id === 'string' && typeof site.name === 'string')) {
-          setSites(parsed as Site[]);
+          setSites(fictionalizeSites(parsed as Site[]));
         }
       }
     } catch { /* ignore invalid local site data */ }

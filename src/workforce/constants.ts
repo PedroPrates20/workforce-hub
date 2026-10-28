@@ -41,21 +41,31 @@ export const TABS: { id: Tab; label: string; icon: LucideIcon; roles: Role[] }[]
   { id: "incidents",  label: "Incidents",        icon: TriangleAlert, roles: ["security","supervisor","hr","director"] },
 ];
 
-const EXTRA_EMPLOYEE_NAMES = Array.from(
-  { length: 50 },
-  (_, index) => `Demo Employee ${String(index + 10).padStart(3, "0")}`,
-);
+const EXTRA_EMPLOYEE_NAMES = [
+  "Aisling Keane", "Niall Keane", "Maeve Keane", "Cillian Keane", "Tara Keane",
+  "Ronan Keane", "Saoirse Keane", "Dara Keane", "Erin Keane", "Kieran Keane",
+  "Aisling Sloane", "Niall Sloane", "Maeve Sloane", "Cillian Sloane", "Tara Sloane",
+  "Ronan Sloane", "Saoirse Sloane", "Dara Sloane", "Erin Sloane", "Kieran Sloane",
+  "Aisling Byrne", "Niall Byrne", "Maeve Byrne", "Cillian Byrne", "Tara Byrne",
+  "Ronan Byrne", "Saoirse Byrne", "Dara Byrne", "Erin Byrne", "Kieran Byrne",
+  "Aisling Dwyer", "Niall Dwyer", "Maeve Dwyer", "Cillian Dwyer", "Tara Dwyer",
+  "Ronan Dwyer", "Saoirse Dwyer", "Dara Dwyer", "Erin Dwyer", "Kieran Dwyer",
+  "Aisling Mercer", "Niall Mercer", "Maeve Mercer", "Cillian Mercer", "Tara Mercer",
+  "Ronan Mercer", "Saoirse Mercer", "Dara Mercer", "Erin Mercer", "Kieran Mercer",
+];
+const EXTRA_SITE_NAMES = ["Ashford", "Copperleaf", "Eastbank", "Foxglove", "Glenhaven", "Highmoor", "Juniper", "Kingswell", "Longmere", "Mossfield"]
+  .flatMap(name => ["Business Centre", "Office Quarter", "Distribution Park", "Retail Village", "Operations Campus"].map(type => `${name} ${type}`));
 
 export const MOCK_EMPLOYEES: Employee[] = DEMO_MODE ? [
-  { id:"e1", name:"Demo Employee 001", role:"supervisor", title:"SUPERVISOR",   email:"employee001@example.com", stamp:"Stamp 4", hoursUsed:72, hoursLimit:160, holidayBalance:14, holidayEntitlement:30, site:"s1", phone:"000-000-0001", nationality:"Not specified", certExpiry:"2099-12-01", visaExpiry:"2099-08-01", active:true },
-  { id:"e2", name:"Demo Employee 002", role:"cleaner",    title:"CLEANER / OP", email:"employee002@example.com", stamp:"Stamp 2", hoursUsed:36, hoursLimit:80, holidayBalance:7, holidayEntitlement:30, site:"s2", phone:"000-000-0002", nationality:"Not specified", certExpiry:"2099-09-15", visaExpiry:"2099-11-30", active:true },
-  { id:"e3", name:"Demo Employee 003", role:"cleaner",    title:"CLEANER / OP", email:"employee003@example.com", stamp:"Stamp 4", hoursUsed:64, hoursLimit:160, holidayBalance:10, holidayEntitlement:30, site:"s3", phone:"000-000-0003", nationality:"Not specified", certExpiry:"2099-03-20", visaExpiry:"2099-01-15", active:true },
-  { id:"e4", name:"Demo Employee 004", role:"cleaner",    title:"CLEANER / OP", email:"employee004@example.com", stamp:"Stamp 2", hoursUsed:40, hoursLimit:80, holidayBalance:5, holidayEntitlement:30, site:"s4", phone:"000-000-0004", nationality:"Not specified", certExpiry:"2099-08-30", visaExpiry:"2099-10-01", active:true },
-  { id:"e5", name:"Demo Employee 005", role:"hr",         title:"HR MANAGER",   email:"employee005@example.com", stamp:null,      hoursUsed:88, hoursLimit:160, holidayBalance:21, holidayEntitlement:30, site:"s5", phone:"000-000-0005", nationality:"Not specified", certExpiry:"2099-01-01", visaExpiry:"2099-01-01", active:true },
-  { id:"e6", name:"Demo Employee 006", role:"security",   title:"SECURITY",     email:"employee006@example.com", stamp:"Stamp 4", hoursUsed:48, hoursLimit:160, holidayBalance:12, holidayEntitlement:30, site:"s1", phone:"000-000-0006", nationality:"Not specified", certExpiry:"2099-11-11", visaExpiry:"2099-06-30", active:true },
-  { id:"e7", name:"Demo Employee 007", role:"cleaner",    title:"CLEANER / OP", email:"employee007@example.com", stamp:"Stamp 2", hoursUsed:76, hoursLimit:80, holidayBalance:3, holidayEntitlement:30, site:"s2", phone:"000-000-0007", nationality:"Not specified", certExpiry:"2099-07-20", visaExpiry:"2099-09-10", active:true },
-  { id:"e8", name:"Demo Employee 008", role:"cleaner",    title:"CLEANER / OP", email:"employee008@example.com", stamp:"Stamp 4", hoursUsed:56, hoursLimit:160, holidayBalance:18, holidayEntitlement:30, site:"s3", phone:"000-000-0008", nationality:"Not specified", certExpiry:"2099-05-01", visaExpiry:"2099-03-01", active:false },
-  { id:"e9", name:"Demo Employee 009", role:"director",   title:"DIRECTOR",     email:"employee009@example.com", stamp:null,      hoursUsed:0, hoursLimit:999, holidayBalance:25, holidayEntitlement:30, site:"s1", phone:"000-000-0009", nationality:"Not specified", certExpiry:"2099-01-01", visaExpiry:"2099-01-01", active:true },
+  { id:"e1", name:"Amara Bennett", role:"supervisor", title:"SUPERVISOR",   email:"employee001@example.com", stamp:"Stamp 4", hoursUsed:72, hoursLimit:160, holidayBalance:14, holidayEntitlement:30, site:"s1", phone:"000-000-0001", nationality:"Not specified", certExpiry:"2099-12-01", visaExpiry:"2099-08-01", active:true },
+  { id:"e2", name:"Noah Walsh", role:"cleaner",    title:"CLEANER / OP", email:"employee002@example.com", stamp:"Stamp 2", hoursUsed:36, hoursLimit:80, holidayBalance:7, holidayEntitlement:30, site:"s2", phone:"000-000-0002", nationality:"Not specified", certExpiry:"2099-09-15", visaExpiry:"2099-11-30", active:true },
+  { id:"e3", name:"Leila Monroe", role:"cleaner",    title:"CLEANER / OP", email:"employee003@example.com", stamp:"Stamp 4", hoursUsed:64, hoursLimit:160, holidayBalance:10, holidayEntitlement:30, site:"s3", phone:"000-000-0003", nationality:"Not specified", certExpiry:"2099-03-20", visaExpiry:"2099-01-15", active:true },
+  { id:"e4", name:"Theo Carrick", role:"cleaner",    title:"CLEANER / OP", email:"employee004@example.com", stamp:"Stamp 2", hoursUsed:40, hoursLimit:80, holidayBalance:5, holidayEntitlement:30, site:"s4", phone:"000-000-0004", nationality:"Not specified", certExpiry:"2099-08-30", visaExpiry:"2099-10-01", active:true },
+  { id:"e5", name:"Erin Caldwell", role:"hr",         title:"HR MANAGER",   email:"employee005@example.com", stamp:null,      hoursUsed:88, hoursLimit:160, holidayBalance:21, holidayEntitlement:30, site:"s5", phone:"000-000-0005", nationality:"Not specified", certExpiry:"2099-01-01", visaExpiry:"2099-01-01", active:true },
+  { id:"e6", name:"Idris Quinn", role:"security",   title:"SECURITY",     email:"employee006@example.com", stamp:"Stamp 4", hoursUsed:48, hoursLimit:160, holidayBalance:12, holidayEntitlement:30, site:"s1", phone:"000-000-0006", nationality:"Not specified", certExpiry:"2099-11-11", visaExpiry:"2099-06-30", active:true },
+  { id:"e7", name:"Maya Kavanagh", role:"cleaner",    title:"CLEANER / OP", email:"employee007@example.com", stamp:"Stamp 2", hoursUsed:76, hoursLimit:80, holidayBalance:3, holidayEntitlement:30, site:"s2", phone:"000-000-0007", nationality:"Not specified", certExpiry:"2099-07-20", visaExpiry:"2099-09-10", active:true },
+  { id:"e8", name:"Owen Clarke", role:"cleaner",    title:"CLEANER / OP", email:"employee008@example.com", stamp:"Stamp 4", hoursUsed:56, hoursLimit:160, holidayBalance:18, holidayEntitlement:30, site:"s3", phone:"000-000-0008", nationality:"Not specified", certExpiry:"2099-05-01", visaExpiry:"2099-03-01", active:false },
+  { id:"e9", name:"Rowan Fitzgerald", role:"director",   title:"DIRECTOR",     email:"employee009@example.com", stamp:null,      hoursUsed:0, hoursLimit:999, holidayBalance:25, holidayEntitlement:30, site:"s1", phone:"000-000-0009", nationality:"Not specified", certExpiry:"2099-01-01", visaExpiry:"2099-01-01", active:true },
   ...EXTRA_EMPLOYEE_NAMES.map((name,index): Employee => ({
     id:`e${index+10}`, name, role:index%8===0?"security":"cleaner",
     title:index%8===0?"SECURITY":"CLEANER / OP",
@@ -68,16 +78,14 @@ export const MOCK_EMPLOYEES: Employee[] = DEMO_MODE ? [
  ] : [];
 
 export const MOCK_SITES: Site[] = DEMO_MODE ? [
-  { id:"s1", name:"Demo Site 01", address:"Sample address, Ireland", client:"Sample Client 01", active:true,  postos:3 },
-  { id:"s2", name:"Demo Site 02", address:"Sample address, Ireland", client:"Sample Client 02", active:true,  postos:5 },
-  { id:"s3", name:"Demo Site 03", address:"Sample address, Ireland", client:"Sample Client 03", active:true,  postos:2 },
-  { id:"s4", name:"Demo Site 04", address:"Sample address, Ireland", client:"Sample Client 04", active:true,  postos:4 },
-  { id:"s5", name:"Demo Site 05", address:"Sample address, Ireland", client:"Sample Client 05", active:false, postos:2 },
-  ...[
-    ...Array.from({ length: 50 }, (_, index) => `Demo Site ${String(index + 6).padStart(2, "0")}`),
-  ].map((name,index): Site => ({
-    id:`s${index+6}`, name, address:"Sample address, Ireland",
-    client:`Sample Client ${String(index%4+1).padStart(2, "0")}`,
+  { id:"s1", name:"Northstar Business Centre", address:"Sample District 01, Ireland", client:"Example Property Group 01", active:true,  postos:3 },
+  { id:"s2", name:"Harbourlight Logistics Hub", address:"Sample District 02, Ireland", client:"Example Property Group 02", active:true,  postos:5 },
+  { id:"s3", name:"Cedarstone Tower", address:"Sample District 03, Ireland", client:"Example Property Group 03", active:true,  postos:2 },
+  { id:"s4", name:"Larkspur Retail Park", address:"Sample District 04, Ireland", client:"Example Property Group 04", active:true,  postos:4 },
+  { id:"s5", name:"Silverfern Operations Campus", address:"Sample District 05, Ireland", client:"Example Property Group 05", active:false, postos:2 },
+  ...EXTRA_SITE_NAMES.map((name,index): Site => ({
+    id:`s${index+6}`, name, address:`Sample District ${String(index+6).padStart(2, "0")}, Ireland`,
+    client:`Example Property Group ${String(index%5+1).padStart(2, "0")}`,
     active:true, postos:2+index%5,
   })),
  ] : [];
@@ -95,12 +103,12 @@ export const MOCK_INCIDENTS: Incident[] = DEMO_MODE ? [
  ] : [];
 
 export const MOCK_CERTS: Certificate[] = DEMO_MODE ? [
-  { empId:"e1", name:"Demo Employee 001", type:"Safe Pass",       expiry:"2099-12-01", status:"valid" },
-  { empId:"e2", name:"Demo Employee 002", type:"Manual Handling", expiry:"2099-09-15", status:"valid" },
-  { empId:"e4", name:"Demo Employee 004", type:"Safe Pass",       expiry:"2099-08-30", status:"valid" },
-  { empId:"e6", name:"Demo Employee 006", type:"PSA Licence",     expiry:"2099-11-11", status:"valid" },
-  { empId:"e7", name:"Demo Employee 007", type:"Safe Pass",       expiry:"2099-07-20", status:"valid" },
-  { empId:"e3", name:"Demo Employee 003", type:"HACCP",           expiry:"2099-03-20", status:"valid" },
+  { empId:"e1", name:"Amara Bennett", type:"Safe Pass",       expiry:"2099-12-01", status:"valid" },
+  { empId:"e2", name:"Noah Walsh", type:"Manual Handling", expiry:"2099-09-15", status:"valid" },
+  { empId:"e4", name:"Theo Carrick", type:"Safe Pass",       expiry:"2099-08-30", status:"valid" },
+  { empId:"e6", name:"Idris Quinn", type:"PSA Licence",     expiry:"2099-11-11", status:"valid" },
+  { empId:"e7", name:"Maya Kavanagh", type:"Safe Pass",       expiry:"2099-07-20", status:"valid" },
+  { empId:"e3", name:"Leila Monroe", type:"HACCP",           expiry:"2099-03-20", status:"valid" },
  ] : [];
 
 export const DOW_EN = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];

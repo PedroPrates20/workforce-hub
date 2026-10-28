@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useServerFn } from '@tanstack/react-start';
 import type { CSSProperties } from 'react';
 import { createPortal } from 'react-dom';
+import { sendRosterEmail } from '../sendRosterEmail';
 import { useApp, useI18n } from '../context/AppContext';
 import { useIsMobile } from '@/hooks/use-mobile';
 import type { RosterData, Employee, RosterStaffFilter } from '../types';
@@ -295,8 +297,9 @@ export function EmailPreviewModal({ onClose, employeeRoleFilter = 'all' }: { onC
   const isMobile = useIsMobile();
   const [mode, setMode] = useState<"employee" | "team">("employee");
   const [selId, setSelId] = useState<string | null>(null);
-  const [sent, setSent] = useState(false);
-  const [clipboardStatus, setClipboardStatus] = useState<"copied" | "failed" | null>(null);
+  const [sendStatus, setSendStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
+  const [sendError, setSendError] = useState("");
+  const sendRosterEmailFn = useServerFn(sendRosterEmail);
 
   useEffect(() => {
     const h = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
@@ -342,31 +345,44 @@ export function EmailPreviewModal({ onClose, employeeRoleFilter = 'all' }: { onC
     return body;
   })();
   const emailSubject = t("Your shift roster · {period}", { period });
-  const gmailCompose = current
-    ? `https://mail.google.com/mail/?${new URLSearchParams({ view: "cm", fs: "1", to: current.emp.email, su: emailSubject }).toString()}`
-    : "";
-  const mailto = current
-    ? `mailto:${encodeURIComponent(current.emp.email)}?${new URLSearchParams({ subject: emailSubject, body: emailBody }).toString()}`
-    : "";
-  const openStyledGmailDraft = async () => {
-    setClipboardStatus(null);
-    window.open(gmailCompose, "_blank", "noopener,noreferrer");
+  const sendCurrentRoster = async () => {
+    const previewBody = document.getElementById("roster-email-html-body");
+    if (!previewBody || !current) {
+      setSendStatus("error");
+      setSendError(t("The roster preview could not be prepared."));
+      return;
+    }
+    setSendStatus("sending");
+    setSendError("");
     try {
-      const previewBody = document.getElementById("roster-email-html-body");
-      if (!previewBody || !navigator.clipboard?.write || typeof ClipboardItem === "undefined") throw new Error("clipboard unavailable");
-      const html = `<!doctype html><html><body style="margin:0;font-family:Arial,Helvetica,sans-serif">${previewBody.outerHTML}</body></html>`;
-      await navigator.clipboard.write([new ClipboardItem({
-        "text/html": new Blob([html], { type: "text/html" }),
-        "text/plain": new Blob([emailBody], { type: "text/plain" }),
-      })]);
-      setClipboardStatus("copied");
+      const result = await sendRosterEmailFn({
+        data: {
+          to: current.emp.email,
+          subject: emailSubject,
+          html: previewBody.outerHTML,
+          text: emailBody,
+        },
+      });
+      if (!result.ok) {
+        const message = result.reason === "not_configured"
+          ? t("Email sending is not configured. Ask an administrator to add the Resend settings in Cloudflare.")
+          : result.reason === "recipient_not_allowed"
+            ? t("Recipient domain is not allowed. Ask an administrator to configure the allowed employee domains.")
+            : result.reason === "invalid_content"
+              ? t("The roster email contains unsupported content.")
+              : t("The email provider could not send the message. Check its settings and try again.");
+        setSendStatus("error");
+        setSendError(message);
+        return;
+      }
+      setSendStatus("sent");
     } catch {
-      setClipboardStatus("failed");
+      setSendStatus("error");
+      setSendError(t("The email provider could not send the message. Check its settings and try again."));
     }
   };
-
   const modeBtn = (m: "employee" | "team", label: string) => (
-    <button onClick={() => { setMode(m); setSent(false); setClipboardStatus(null); }}
+    <button onClick={() => { setMode(m); setSendStatus("idle"); setSendError(""); }}
       style={{ flex: 1, padding: isMobile ? "9px 8px" : "7px 8px", borderRadius: 7, cursor: "pointer", fontFamily: "inherit", fontSize: 12, fontWeight: 700,
         border: `1.5px solid ${mode === m ? C.gold : C.border}`, background: mode === m ? `${C.gold}18` : "transparent", color: mode === m ? C.gold : C.muted }}>
       {label}
@@ -411,7 +427,7 @@ export function EmailPreviewModal({ onClose, employeeRoleFilter = 'all' }: { onC
                         const active = r.emp.id === current.emp.id;
                         const over = r.emp.stamp !== null && r.emp.hoursUsed + r.hours > r.emp.hoursLimit;
                         return (
-                          <button key={r.emp.id} onClick={() => { setSelId(r.emp.id); setSent(false); setClipboardStatus(null); }}
+                          <button key={r.emp.id} onClick={() => { setSelId(r.emp.id); setSendStatus("idle"); setSendError(""); }}
                             style={{ flexShrink: 0, display: "flex", alignItems: "center", gap: 8, padding: "6px 12px 6px 6px", borderRadius: 99, cursor: "pointer", fontFamily: "inherit",
                               border: `1px solid ${active ? C.gold : C.border}`, background: active ? `${C.gold}18` : "transparent", color: C.text, fontSize: 13, fontWeight: 600 }}>
                             <span style={{ width: 28, height: 28, borderRadius: "50%", background: roleColor(r.emp.role), color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10, fontWeight: 800 }}>{initials(r.emp.name)}</span>
@@ -428,7 +444,7 @@ export function EmailPreviewModal({ onClose, employeeRoleFilter = 'all' }: { onC
                           const active = r.emp.id === current.emp.id;
                           const over = r.emp.stamp !== null && r.emp.hoursUsed + r.hours > r.emp.hoursLimit;
                           return (
-                            <button key={r.emp.id} onClick={() => { setSelId(r.emp.id); setSent(false); setClipboardStatus(null); }}
+                            <button key={r.emp.id} onClick={() => { setSelId(r.emp.id); setSendStatus("idle"); setSendError(""); }}
                               style={{ width: "100%", display: "flex", alignItems: "center", gap: 10, padding: "8px 10px", marginBottom: 4, borderRadius: 8, cursor: "pointer", fontFamily: "inherit", textAlign: "left",
                                 border: `1px solid ${active ? C.gold : "transparent"}`, background: active ? `${C.gold}18` : "transparent" }}>
                               <div style={{ width: 32, height: 32, borderRadius: "50%", background: roleColor(r.emp.role), color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: 800, flexShrink: 0 }}>{initials(r.emp.name)}</div>
@@ -467,31 +483,21 @@ export function EmailPreviewModal({ onClose, employeeRoleFilter = 'all' }: { onC
 
             {/* footer actions */}
             <div style={{ padding: "12px 16px", borderTop: `1px solid ${C.border}`, display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap", flexShrink: 0 }}>
-              <div style={{ flex: isMobile ? "1 1 100%" : 1, fontSize: 12, color: sent ? C.green : C.muted }}>
-                {clipboardStatus === "copied"
-                  ? t("Formatted roster copied. In Gmail, click the message body and press Ctrl+V.")
-                  : clipboardStatus === "failed"
-                    ? t("Gmail opened, but formatting could not be copied. Copy the preview and paste it into the message body.")
-                    : sent
-                  ? t("Queued for {n} {noun} — demo only, no e-mail server is connected yet.", { n: recipients.length, noun })
-                  : mode === "employee"
-                    ? t("Review the e-mail, open Gmail, then paste the formatted roster into the message body.")
-                    : t("Review the e-mail, then send.")}
+              <div role={sendStatus === "error" ? "alert" : "status"} aria-live="polite" style={{ flex: isMobile ? "1 1 100%" : 1, fontSize: 12, color: sendStatus === "sent" ? C.green : sendStatus === "error" ? C.red : C.muted }}>
+                {sendStatus === "sent"
+                  ? t("Email sent to {email}.", { email: current.emp.email })
+                  : sendStatus === "error"
+                    ? sendError
+                    : mode === "employee"
+                      ? t("Review the e-mail and send it directly from Workforce Hub.")
+                      : t("Select an employee to send a personal roster email.")}
               </div>
               {mode === "employee" && (
-                <>
-                  <button type="button" onClick={() => void openStyledGmailDraft()} style={{ flex: isMobile ? 1 : undefined, textAlign: "center", textDecoration: "none", background: C.gold, color: "#fff", border: `1px solid ${C.gold}`, borderRadius: 7, padding: "11px 16px", fontWeight: 700, fontSize: 13, fontFamily: "inherit", cursor: "pointer" }}>
-                    {t("Open Gmail & paste roster")}
-                  </button>
-                  <a href={mailto} style={{ flex: isMobile ? 1 : undefined, textAlign: "center", textDecoration: "none", background: "transparent", color: C.text, border: `1px solid ${C.border}`, borderRadius: 7, padding: "11px 16px", fontWeight: 700, fontSize: 13, fontFamily: "inherit" }}>
-                    {t("Use default e-mail app")}
-                  </a>
-                </>
+                <button type="button" onClick={() => void sendCurrentRoster()} disabled={sendStatus === "sending" || sendStatus === "sent"}
+                  style={{ flex: isMobile ? 1 : undefined, textAlign: "center", background: sendStatus === "sent" ? C.green : C.gold, color: "#fff", border: `1px solid ${sendStatus === "sent" ? C.green : C.gold}`, borderRadius: 7, padding: "11px 16px", fontWeight: 700, fontSize: 13, fontFamily: "inherit", cursor: sendStatus === "sending" || sendStatus === "sent" ? "default" : "pointer" }}>
+                  {sendStatus === "sending" ? t("Sending…") : sendStatus === "sent" ? t("Sent") : t("Send roster automatically")}
+                </button>
               )}
-              <button onClick={() => setSent(true)} disabled={sent}
-                style={{ flex: isMobile ? 1 : undefined, background: sent ? C.green : C.gold, color: "#fff", border: "none", borderRadius: 7, padding: "11px 18px", fontWeight: 700, fontSize: 13, cursor: sent ? "default" : "pointer", fontFamily: "inherit" }}>
-                {sent ? t("Sent") : t("Send to {n} {noun}", { n: recipients.length, noun })}
-              </button>
             </div>
           </>
         )}

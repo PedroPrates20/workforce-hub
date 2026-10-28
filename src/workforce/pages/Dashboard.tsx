@@ -80,12 +80,28 @@ export function Dashboard() {
                 <strong style={{fontSize:12,color:C.text}}>{t('Week {n}',{n:weekIndex+1})}</strong>
                 <span style={{fontSize:11,fontWeight:800,color:C.gold}}>{t('Week total')}: {formatHours(hoursForDays(week))}</span>
               </div>
-              {isMobile ? <div style={{display:'flex',flexDirection:'column'}}>{week.map(date=>{
+              {isMobile ? <div style={{display:'grid',gridTemplateColumns:'repeat(2,minmax(0,1fr))',gap:7}}>{week.map((date,dayIndex)=>{
                 const key=fmt(date), isToday=key===today, dayShifts=shiftsForDay(date);
-                return <div key={key} aria-current={isToday?'date':undefined} style={{display:'flex',gap:9,padding:9,borderBottom:`1px solid ${C.border}`,background:isToday?`${C.gold}20`:[0,6].includes(date.getDay())?'#fffaf4':C.card,boxShadow:isToday?`inset 4px 0 ${C.gold}`:undefined}}>
-                  <div style={{width:39,flexShrink:0,textAlign:'center'}}><div style={{fontSize:9,fontWeight:800,color:isToday?C.gold:[0,6].includes(date.getDay())?'#b45309':C.muted,textTransform:'uppercase'}}>{DOW[lang][date.getDay()]}</div><div style={{fontSize:18,fontWeight:900,color:isToday?C.gold:C.text}}>{date.getDate()}</div><div style={{fontSize:9,color:C.muted}}>{MONTHS[lang][date.getMonth()]}</div>{isToday&&<div style={{fontSize:8,fontWeight:900,color:C.gold}}>{t('Today')}</div>}</div>
-                  <div style={{flex:1,minWidth:0}}>{dayShifts.length===0?<div style={{fontSize:11,color:C.muted,fontStyle:'italic',paddingTop:9}}>{t('Day Off')}</div>:dayShifts.map((shift,index)=>{const preset=SHIFT_PRESETS.find(item=>item.start===shift.start);return <div key={`${shift.siteId}-${shift.start}-${index}`} style={{padding:'6px 8px',marginBottom:5,borderRadius:6,borderLeft:`3px solid ${preset?.color??C.gold}`,background:`${preset?.bg??C.surface}55`}}><div style={{fontSize:11,fontWeight:800,color:C.text}}>{shift.start}–{shift.end}</div><div style={{fontSize:10,color:C.muted,marginTop:2}}>{sites.find(site=>site.id===shift.siteId)?.name??shift.siteId}</div></div>;})}</div>
-                  {dayShifts.length>0&&<div style={{alignSelf:'center',fontSize:10,fontWeight:800,color:C.gold,whiteSpace:'nowrap'}}>{formatHours(dayShifts.reduce((sum,shift)=>sum+shiftHours(shift.start,shift.end),0))}</div>}
+                const dayHours=dayShifts.reduce((sum,shift)=>sum+shiftHours(shift.start,shift.end),0);
+                return <div key={key} aria-current={isToday?'date':undefined} style={{gridColumn:week.length%2===1&&dayIndex===week.length-1?'1 / -1':undefined,minWidth:0,minHeight:112,display:'flex',flexDirection:'column',gap:7,padding:8,borderRadius:8,border:`1px solid ${isToday?C.gold:C.border}`,background:isToday?`${C.gold}18`:[0,6].includes(date.getDay())?'#fffaf4':C.card,boxShadow:isToday?`inset 0 3px ${C.gold}`:undefined}}>
+                  <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',gap:4}}>
+                    <div style={{display:'flex',alignItems:'baseline',gap:5,minWidth:0}}>
+                      <span style={{fontSize:9,fontWeight:800,color:isToday?C.gold:[0,6].includes(date.getDay())?'#b45309':C.muted,textTransform:'uppercase'}}>{DOW[lang][date.getDay()]}</span>
+                      <span style={{fontSize:18,lineHeight:'20px',fontWeight:900,color:isToday?C.gold:C.text}}>{date.getDate()}</span>
+                      <span style={{fontSize:9,color:C.muted}}>{MONTHS[lang][date.getMonth()]}</span>
+                    </div>
+                    {isToday&&<span style={{fontSize:8,fontWeight:900,color:C.gold,whiteSpace:'nowrap'}}>{t('Today')}</span>}
+                  </div>
+                  <div style={{flex:1,minWidth:0}}>
+                    {dayShifts.length===0?<div style={{fontSize:10,color:C.muted,fontStyle:'italic',paddingTop:5}}>{t('Day Off')}</div>:dayShifts.map((shift,index)=>{
+                      const preset=SHIFT_PRESETS.find(item=>item.start===shift.start);
+                      return <div key={`${shift.siteId}-${shift.start}-${index}`} style={{padding:'5px 6px',marginBottom:4,borderRadius:6,borderLeft:`3px solid ${preset?.color??C.gold}`,background:`${preset?.bg??C.surface}55`}}>
+                        <div style={{fontSize:10,fontWeight:800,color:C.text,whiteSpace:'nowrap'}}>{shift.start}–{shift.end}</div>
+                        <div style={{fontSize:9,color:C.muted,marginTop:2,overflowWrap:'anywhere',lineHeight:'12px'}}>{sites.find(site=>site.id===shift.siteId)?.name??shift.siteId}</div>
+                      </div>;
+                    })}
+                  </div>
+                  {dayHours>0&&<div style={{fontSize:10,fontWeight:800,color:C.gold}}>{formatHours(dayHours)}</div>}
                 </div>;
               })}</div> : <div style={{display:'grid',gridTemplateColumns:'repeat(7,minmax(0,1fr))'}}>{week.map(date=>{
                 const key=fmt(date), isToday=key===today, dayShifts=shiftsForDay(date);

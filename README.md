@@ -49,6 +49,20 @@ Vite prints the local development address in the terminal. Open that address in 
 npm run build
 ```
 
+### Configure roster email delivery
+
+The roster preview can send its rendered HTML directly from the site through Resend. To enable delivery:
+
+1. Create a Resend account and verify a sending domain that you control.
+2. In Cloudflare, open **Workers & Pages** and select the Workforce Hub Worker.
+3. Under **Settings → Variables and Secrets**, add:
+   - Secret `RESEND_API_KEY`: the API key from Resend.
+   - Variable `RESEND_FROM_EMAIL`: a sender on the verified domain, for example `Workforce Hub <roster@your-domain.ie>`.
+   - Variable `ROSTER_EMAIL_ALLOWED_DOMAINS`: the employee email domains allowed to receive rosters, separated by commas and without `@`.
+4. Save the settings and redeploy the Worker.
+
+The demo directory uses fictional names, locations, and `example.com` email addresses. Those addresses cannot receive mail; replace them with valid employee addresses in a secured, production data store before enabling delivery for real staff.
+
 ## Technology
 
 - React and TypeScript
@@ -69,7 +83,7 @@ src/lib/             Shared utilities
 
 ## Important prototype limitations
 
-The current demonstration uses browser-local data and development profiles. Data saved in one browser is not a central company record and may not be available on another device. Email previews and prototype actions do not replace a verified delivery and audit trail.
+The current demonstration uses browser-local data and development profiles. Data saved in one browser is not a central company record and may not be available on another device. Roster emails are sent only after Resend is configured, and the service restricts recipients to the configured email domains.
 
 Before handling real employee information or operating this system in a business environment, the project needs, at minimum:
 
