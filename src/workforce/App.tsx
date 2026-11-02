@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import type { User, Tab, Lang, RosterData, Site, Employee, SupplyRequest, HolidayRequest, HolidayBlock } from './types';
-import { C, DEMO_MODE, MOCK_SITES, MOCK_SWAPS, MOCK_EMPLOYEES, buildSeedRoster, TABS } from './constants';
+import { C, DEMO_MODE, MOCK_SITES, MOCK_SWAPS, MOCK_EMPLOYEES, buildSeedRoster, fictionalEmployeeEmail, TABS } from './constants';
 import { Ctx } from './context/AppContext';
 
 import { Sidebar } from './components/Sidebar';
@@ -39,7 +39,7 @@ const fictionalizeEmployees = (stored: Employee[]) => stored.map((employee, inde
   return {
     ...employee,
     name: sample?.name ?? `Fictional Staff ${number}`,
-    email: sample?.email ?? `demo-staff-${number}@example.com`,
+    email: sample?.email ?? fictionalEmployeeEmail(`Fictional Staff ${number}`),
     phone: sample?.phone ?? "000-000-0000",
     address: "Sample address, Ireland",
     nationality: "Not specified",

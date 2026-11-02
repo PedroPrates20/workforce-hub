@@ -27,6 +27,11 @@ export const PROFILES: Record<Role, { label: string; title: string; color: strin
   director:   { label: "Director",    title: "DIRECTOR / ADMIN", color: "#d97706" },
 };
 
+export const fictionalEmployeeEmail = (name: string) => {
+  const localPart = name.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, ".").replace(/^\.|\.$/g, "");
+  return `${localPart || "fictional.staff"}@example.com`;
+};
+
 export const TABS: { id: Tab; label: string; icon: LucideIcon; roles: Role[] }[] = [
   { id: "dashboard",  label: "Dashboard",        icon: LayoutDashboard, roles: ["cleaner","security","supervisor","hr","director"] },
   { id: "roster",     label: "Roster / E-mail",  icon: CalendarDays, roles: ["supervisor","hr","director"] },
@@ -57,19 +62,19 @@ const EXTRA_SITE_NAMES = ["Ashford", "Copperleaf", "Eastbank", "Foxglove", "Glen
   .flatMap(name => ["Business Centre", "Office Quarter", "Distribution Park", "Retail Village", "Operations Campus"].map(type => `${name} ${type}`));
 
 export const MOCK_EMPLOYEES: Employee[] = DEMO_MODE ? [
-  { id:"e1", name:"Amara Bennett", role:"supervisor", title:"SUPERVISOR",   email:"employee001@example.com", stamp:"Stamp 4", hoursUsed:72, hoursLimit:160, holidayBalance:14, holidayEntitlement:30, site:"s1", phone:"000-000-0001", nationality:"Not specified", certExpiry:"2099-12-01", visaExpiry:"2099-08-01", active:true },
-  { id:"e2", name:"Noah Walsh", role:"cleaner",    title:"CLEANER / OP", email:"employee002@example.com", stamp:"Stamp 2", hoursUsed:36, hoursLimit:80, holidayBalance:7, holidayEntitlement:30, site:"s2", phone:"000-000-0002", nationality:"Not specified", certExpiry:"2099-09-15", visaExpiry:"2099-11-30", active:true },
-  { id:"e3", name:"Leila Monroe", role:"cleaner",    title:"CLEANER / OP", email:"employee003@example.com", stamp:"Stamp 4", hoursUsed:64, hoursLimit:160, holidayBalance:10, holidayEntitlement:30, site:"s3", phone:"000-000-0003", nationality:"Not specified", certExpiry:"2099-03-20", visaExpiry:"2099-01-15", active:true },
-  { id:"e4", name:"Theo Carrick", role:"cleaner",    title:"CLEANER / OP", email:"employee004@example.com", stamp:"Stamp 2", hoursUsed:40, hoursLimit:80, holidayBalance:5, holidayEntitlement:30, site:"s4", phone:"000-000-0004", nationality:"Not specified", certExpiry:"2099-08-30", visaExpiry:"2099-10-01", active:true },
-  { id:"e5", name:"Erin Caldwell", role:"hr",         title:"HR MANAGER",   email:"employee005@example.com", stamp:null,      hoursUsed:88, hoursLimit:160, holidayBalance:21, holidayEntitlement:30, site:"s5", phone:"000-000-0005", nationality:"Not specified", certExpiry:"2099-01-01", visaExpiry:"2099-01-01", active:true },
-  { id:"e6", name:"Idris Quinn", role:"security",   title:"SECURITY",     email:"employee006@example.com", stamp:"Stamp 4", hoursUsed:48, hoursLimit:160, holidayBalance:12, holidayEntitlement:30, site:"s1", phone:"000-000-0006", nationality:"Not specified", certExpiry:"2099-11-11", visaExpiry:"2099-06-30", active:true },
-  { id:"e7", name:"Maya Kavanagh", role:"cleaner",    title:"CLEANER / OP", email:"employee007@example.com", stamp:"Stamp 2", hoursUsed:76, hoursLimit:80, holidayBalance:3, holidayEntitlement:30, site:"s2", phone:"000-000-0007", nationality:"Not specified", certExpiry:"2099-07-20", visaExpiry:"2099-09-10", active:true },
-  { id:"e8", name:"Owen Clarke", role:"cleaner",    title:"CLEANER / OP", email:"employee008@example.com", stamp:"Stamp 4", hoursUsed:56, hoursLimit:160, holidayBalance:18, holidayEntitlement:30, site:"s3", phone:"000-000-0008", nationality:"Not specified", certExpiry:"2099-05-01", visaExpiry:"2099-03-01", active:false },
-  { id:"e9", name:"Rowan Fitzgerald", role:"director",   title:"DIRECTOR",     email:"employee009@example.com", stamp:null,      hoursUsed:0, hoursLimit:999, holidayBalance:25, holidayEntitlement:30, site:"s1", phone:"000-000-0009", nationality:"Not specified", certExpiry:"2099-01-01", visaExpiry:"2099-01-01", active:true },
+  { id:"e1", name:"Amara Bennett", role:"supervisor", title:"SUPERVISOR",   email:fictionalEmployeeEmail("Amara Bennett"), stamp:"Stamp 4", hoursUsed:72, hoursLimit:160, holidayBalance:14, holidayEntitlement:30, site:"s1", phone:"000-000-0001", nationality:"Not specified", certExpiry:"2099-12-01", visaExpiry:"2099-08-01", active:true },
+  { id:"e2", name:"Noah Walsh", role:"cleaner",    title:"CLEANER / OP", email:fictionalEmployeeEmail("Noah Walsh"), stamp:"Stamp 2", hoursUsed:36, hoursLimit:80, holidayBalance:7, holidayEntitlement:30, site:"s2", phone:"000-000-0002", nationality:"Not specified", certExpiry:"2099-09-15", visaExpiry:"2099-11-30", active:true },
+  { id:"e3", name:"Leila Monroe", role:"cleaner",    title:"CLEANER / OP", email:fictionalEmployeeEmail("Leila Monroe"), stamp:"Stamp 4", hoursUsed:64, hoursLimit:160, holidayBalance:10, holidayEntitlement:30, site:"s3", phone:"000-000-0003", nationality:"Not specified", certExpiry:"2099-03-20", visaExpiry:"2099-01-15", active:true },
+  { id:"e4", name:"Theo Carrick", role:"cleaner",    title:"CLEANER / OP", email:fictionalEmployeeEmail("Theo Carrick"), stamp:"Stamp 2", hoursUsed:40, hoursLimit:80, holidayBalance:5, holidayEntitlement:30, site:"s4", phone:"000-000-0004", nationality:"Not specified", certExpiry:"2099-08-30", visaExpiry:"2099-10-01", active:true },
+  { id:"e5", name:"Erin Caldwell", role:"hr",         title:"HR MANAGER",   email:fictionalEmployeeEmail("Erin Caldwell"), stamp:null,      hoursUsed:88, hoursLimit:160, holidayBalance:21, holidayEntitlement:30, site:"s5", phone:"000-000-0005", nationality:"Not specified", certExpiry:"2099-01-01", visaExpiry:"2099-01-01", active:true },
+  { id:"e6", name:"Idris Quinn", role:"security",   title:"SECURITY",     email:fictionalEmployeeEmail("Idris Quinn"), stamp:"Stamp 4", hoursUsed:48, hoursLimit:160, holidayBalance:12, holidayEntitlement:30, site:"s1", phone:"000-000-0006", nationality:"Not specified", certExpiry:"2099-11-11", visaExpiry:"2099-06-30", active:true },
+  { id:"e7", name:"Maya Kavanagh", role:"cleaner",    title:"CLEANER / OP", email:fictionalEmployeeEmail("Maya Kavanagh"), stamp:"Stamp 2", hoursUsed:76, hoursLimit:80, holidayBalance:3, holidayEntitlement:30, site:"s2", phone:"000-000-0007", nationality:"Not specified", certExpiry:"2099-07-20", visaExpiry:"2099-09-10", active:true },
+  { id:"e8", name:"Owen Clarke", role:"cleaner",    title:"CLEANER / OP", email:fictionalEmployeeEmail("Owen Clarke"), stamp:"Stamp 4", hoursUsed:56, hoursLimit:160, holidayBalance:18, holidayEntitlement:30, site:"s3", phone:"000-000-0008", nationality:"Not specified", certExpiry:"2099-05-01", visaExpiry:"2099-03-01", active:false },
+  { id:"e9", name:"Rowan Fitzgerald", role:"director",   title:"DIRECTOR",     email:fictionalEmployeeEmail("Rowan Fitzgerald"), stamp:null,      hoursUsed:0, hoursLimit:999, holidayBalance:25, holidayEntitlement:30, site:"s1", phone:"000-000-0009", nationality:"Not specified", certExpiry:"2099-01-01", visaExpiry:"2099-01-01", active:true },
   ...EXTRA_EMPLOYEE_NAMES.map((name,index): Employee => ({
     id:`e${index+10}`, name, role:index%8===0?"security":"cleaner",
     title:index%8===0?"SECURITY":"CLEANER / OP",
-    email:`employee${String(index+10).padStart(3,"0")}@example.com`, stamp:index%3===0?"Stamp 4":"Stamp 2",
+    email:fictionalEmployeeEmail(name), stamp:index%3===0?"Stamp 4":"Stamp 2",
     hoursUsed:32+(index%7)*8, hoursLimit:index%3===0?160:80, holidayBalance:5+(index%18), holidayEntitlement:30,
     site:`s${index%55+1}`, phone:"000-000-0000",
     nationality:"Not specified",
