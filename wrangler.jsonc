@@ -1,6 +1,15 @@
 {
-  "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "workforce-hub",
-  "compatibility_date": "2026-10-26",
-  "compatibility_flags": ["nodejs_compat"]
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"name": "workforce-hub",
+	"compatibility_date": "2026-10-26",
+	"compatibility_flags": [
+		"nodejs_compat"
+	],
+	"d1_databases": [
+		{
+			"binding": "DB",
+			"database_name": "workforce-hub-demo",
+			"database_id": "e9d6f8de-868d-4af8-8d26-64f777b1f5fc"
+		}
+	]
 }

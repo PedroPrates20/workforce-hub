@@ -17,6 +17,7 @@ import { Incidents } from './pages/Incidents';
 import { Ponto } from './pages/Ponto';
 import { Reports } from './pages/Reports';
 import { Audit } from './pages/Audit';
+import { getSharedDirectory } from './directoryDb';
 
 const TAB_COMPONENTS: Record<Tab, () => React.ReactElement> = {
   dashboard: Dashboard,
@@ -82,6 +83,16 @@ export default function WorkforceApp() {
   const [sitesLoaded, setSitesLoaded] = useState(false);
   const [employees, setEmployees] = useState<Employee[]>(MOCK_EMPLOYEES);
   const [employeesLoaded, setEmployeesLoaded] = useState(false);
+
+  // Prefer the shared Cloudflare D1 demo directory when the Worker binding exists.
+  // The browser-local demo remains available for local previews without Cloudflare.
+  useEffect(() => {
+    void getSharedDirectory().then(directory => {
+      if (!directory.configured) return;
+      setEmployees(directory.employees);
+      setSites(directory.sites);
+    }).catch(error => console.error('Could not load the shared demo directory.', error));
+  }, []);
 
   useEffect(() => {
     if(!DEMO_MODE){setSupplyRequestsLoaded(true);return;}

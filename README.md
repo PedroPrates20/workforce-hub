@@ -63,6 +63,17 @@ The roster preview can send its rendered HTML directly from the site through Res
 
 The demo directory uses fictional names, locations, and `example.com` email addresses. Those addresses cannot receive mail; replace them with valid employee addresses in a secured, production data store before enabling delivery for real staff.
 
+## Shared demo directory (Cloudflare D1)
+
+This project is connected to a Cloudflare D1 database in the EU, already populated with 59 fictional employees and 55 fictional sites. The D1 binding is recorded in `wrangler.jsonc`. To set up a separate Cloudflare account or fork:
+
+1. Install Wrangler if needed and sign in with `npx wrangler login`.
+2. Replace or remove this project's existing `d1_databases` entry in `wrangler.jsonc`, then run `npm run db:create` to create your own database and binding (`DB`).
+3. Run `npm run db:migrate:remote` to create the tables and load the fictional records into the remote database.
+4. Push the updated `wrangler.jsonc`, `migrations/`, and app code to GitHub and wait for the Cloudflare deployment.
+
+When the Worker has the `DB` binding, the app loads its employee and site directory from D1. Without a binding, demo-mode local and preview builds use the bundled fictional records. The D1 directory currently provides shared reads; application edits and workflow requests still use the prototype's browser storage and are not yet synchronized to D1. This demo uses fictional `example.com` emails and must not be used for real employee information.
+
 ## Technology
 
 - React and TypeScript

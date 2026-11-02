@@ -8,6 +8,8 @@
     "build": "vite build",
     "build:demo": "vite build --mode demo",
     "build:dev": "vite build --mode development",
+    "db:create": "npx wrangler d1 create workforce-hub-demo --binding DB --update-config --jurisdiction eu",
+    "db:migrate:remote": "npx wrangler d1 migrations apply workforce-hub-demo --remote",
     "preview": "vite preview",
     "lint": "eslint .",
     "format": "prettier --write .",
