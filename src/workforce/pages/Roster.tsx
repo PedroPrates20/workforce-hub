@@ -161,7 +161,7 @@ export function Roster() {
         <div style={{fontSize:11,color:C.muted,marginLeft:"auto",textAlign:"right"}}>{t("Drop employee on a day · Maximum 7 shifts per day")}</div>
       </div>
 
-      <section aria-labelledby="available-roster-employees" style={{position:isMobile?'static':'sticky',top:isMobile?undefined:10,zIndex:30,padding:14,marginBottom:18,background:C.card,border:`1px solid ${C.border}`,borderRadius:10,boxShadow:isMobile?undefined:'0 6px 18px rgba(27,38,56,.10)'}}>
+      <section aria-labelledby="available-roster-employees" style={{position:'sticky',top:isMobile?6:10,zIndex:30,padding:isMobile?10:14,marginBottom:18,background:C.card,border:`1px solid ${C.border}`,borderRadius:10,boxShadow:'0 6px 18px rgba(27,38,56,.10)'}}>
         <div style={{display:'flex',alignItems:'flex-start',justifyContent:'space-between',gap:12,flexWrap:'wrap',marginBottom:10}}>
           <div>
             <h2 id="available-roster-employees" style={{margin:0,fontSize:14,fontWeight:800,color:C.text}}>{t('Available employees')} <span style={{fontSize:11,fontWeight:600,color:C.muted}}>({filteredEmployees.length})</span></h2>
@@ -170,7 +170,7 @@ export function Roster() {
           <input value={employeeFilter} onChange={event=>setEmployeeFilter(event.target.value)} placeholder={t('Filter employees...')} aria-label={t('Filter employees...')} style={{width:'min(100%,300px)',height:38,boxSizing:'border-box',padding:'0 11px',border:`1px solid ${C.border}`,borderRadius:8,background:C.card,color:C.text,fontSize:12,fontFamily:'inherit',outlineColor:C.gold}} />
         </div>
         {dropNotice&&<div role="alert" style={{fontSize:11,color:C.red,marginBottom:9}}>{dropNotice}</div>}
-        <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(min(100%,190px),1fr))',gap:7,maxHeight:210,overflowY:'auto',padding:2}}>
+        <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(min(100%,190px),1fr))',gap:7,maxHeight:isMobile?'min(24dvh, 210px)':210,overflowY:'auto',padding:2}}>
           {filteredEmployees.map(employee=>{
             const employeeColor=roleColor(employee.role,employee.id);
             const active=selectedEmployee===employee.id;
