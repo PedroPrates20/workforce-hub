@@ -225,7 +225,8 @@ export function Roster() {
                             <div key={sl.empId} style={{display:"flex",alignItems:"center",gap:8,border:`1px solid ${employeeColor}45`,borderLeft:`4px solid ${employeeColor}`,borderRadius:8,background:ps.bg+"16",padding:"6px 8px"}}>
                               <div style={{width:26,height:26,borderRadius:"50%",background:employeeColor,color:"#fff",display:"flex",alignItems:"center",justifyContent:"center",fontSize:10,fontWeight:800,flexShrink:0}}>{initials(emp.name)}</div>
                               <div style={{flex:1,minWidth:0}}>
-                                <div style={{display:'flex',alignItems:'center',gap:6,flexWrap:'wrap'}}><div style={{fontSize:15,fontWeight:800,color:C.text,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{emp.name}</div><Badge label={t(emp.role==='cleaner'?'Cleaner':emp.role==='security'?'Security':'Supervisor')} color={employeeColor}/></div>
+                                <div style={{fontSize:15,fontWeight:800,color:C.text,whiteSpace:'normal',overflowWrap:'anywhere',lineHeight:1.2}}>{emp.name}</div>
+                                <div style={{marginTop:4}}><Badge label={t(emp.role==='cleaner'?'Cleaner':emp.role==='security'?'Security':'Supervisor')} color={employeeColor}/></div>
                                 <div style={{fontSize:14,fontWeight:800,color:ps.color,marginTop:3}}>{sl.start}–{sl.end}</div>
                               </div>
                               <button onClick={()=>removeSlot(dk,activeSite,sl.empId)} aria-label={t("Remove {name}",{name:emp.name})} title={t("Remove shift")}
@@ -369,15 +370,10 @@ export function Roster() {
                                         {initials(emp.name)}
                                       </div>
 
-                                      <div style={{
-                                        minWidth:0,flex:1,fontSize:14,
-                                        fontWeight:800,color:C.text,
-                                        overflow:"hidden",textOverflow:"ellipsis",
-                                        whiteSpace:"nowrap"
-                                      }}>
-                                        {emp.name}
+                                      <div style={{minWidth:0,flex:1}}>
+                                        <div style={{fontSize:14,fontWeight:800,color:C.text,whiteSpace:'normal',overflowWrap:'anywhere',lineHeight:1.2}}>{emp.name}</div>
+                                        <div style={{marginTop:4}}><Badge label={t(emp.role==='cleaner'?'Cleaner':emp.role==='security'?'Security':'Supervisor')} color={employeeColor}/></div>
                                       </div>
-                                      <Badge label={t(emp.role==='cleaner'?'Cleaner':emp.role==='security'?'Security':'Supervisor')} color={employeeColor}/>
 
                                       <button
                                         onClick={()=>removeSlot(dk,activeSite,sl.empId)}
