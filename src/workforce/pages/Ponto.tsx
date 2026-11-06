@@ -19,7 +19,7 @@ const distanceInMeters = (lat1:number,lon1:number,lat2:number,lon2:number) => {
 export function Ponto() {
   const {lang,t}=useI18n();
   const {user,sites,setTab}=useApp();
-  const canConfigureSites=user.role==='hr'||user.role==='director';
+  const canConfigureSites=user.role==='hr'||user.role==='director'||user.role==='admin';
   const storageKey=`epm_attendance_${user.id}`;
   const [now,setNow]=useState(()=>new Date());
   const [log,setLog]=useState<AttendanceEntry[]>(()=>{

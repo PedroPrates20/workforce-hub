@@ -37,9 +37,9 @@ function readCertificate(file: File) {
 export function Swaps() {
   const { user, employees, swaps, setSwaps, sites, holidayRequests, setHolidayRequests, holidayBlocks, setHolidayBlocks, setEmployees } = useApp();
   const { lang, t } = useI18n();
-  const canReviewSwap = ['supervisor', 'hr', 'director'].includes(user.role);
-  const isHr = user.role === 'hr';
-  const isDirector = user.role === 'director';
+  const canReviewSwap = ['supervisor', 'hr', 'director', 'admin'].includes(user.role);
+  const isHr = user.role === 'hr' || user.role === 'admin';
+  const isDirector = user.role === 'director' || user.role === 'admin';
   const currentEmployee = employees.find(employee => employee.id === user.id);
   const activeSites = sites.filter(site => site.active);
   const candidates = employees.filter(employee => employee.active && employee.id !== user.id && ['cleaner', 'security', 'supervisor'].includes(employee.role));

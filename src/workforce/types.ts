@@ -1,4 +1,5 @@
-export type Role = "cleaner" | "security" | "supervisor" | "hr" | "director";
+export type Role = "cleaner" | "security" | "supervisor" | "hr" | "director" | "admin";
+export type EmployeeRole = Exclude<Role, "admin">;
 export type RosterStaffFilter = "all" | "cleaner" | "security";
 export type Tab = "dashboard" | "roster" | "team" | "sites" | "swaps" | "supplies" | "reports" | "certs" | "ponto" | "audit" | "incidents";
 export type Lang = "pt" | "en" | "ru" | "ro";
@@ -18,6 +19,7 @@ export interface User {
 }
 
 export interface Employee extends User {
+  role: EmployeeRole;
   phone: string;
   address?: string;
   contractStart?: string;

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
-import { C, PROFILES, SHIFT_PRESETS, initials, roleColor } from '../constants';
+import { C, SHIFT_PRESETS, initials, roleColor } from '../constants';
 import { useApp, useI18n } from '../context/AppContext';
 import { useIsMobile } from '@/hooks/use-mobile';
 import type { RosterStaffFilter } from '../types';
@@ -17,6 +17,7 @@ export function ShiftModal({siteId: _siteId, siteName, dayLabel, assigned, staff
   const [selEmp,setSelEmp]=useState<string|null>(fixedEmployeeId??null);
   const [start,setStart]=useState("09:00");
   const [end,setEnd]=useState("17:00");
+  const fixedEmployee=employees.find(employee=>employee.id===fixedEmployeeId);
   const avail = employees.filter(e=>e.active && ['cleaner','security','supervisor'].includes(e.role) && (staffFilter==='all'||e.role===staffFilter) && (!fixedEmployeeId||e.id===fixedEmployeeId) && !assigned.includes(e.id) && e.name.toLowerCase().includes(search.toLowerCase()));
 
   return createPortal(
@@ -25,15 +26,15 @@ export function ShiftModal({siteId: _siteId, siteName, dayLabel, assigned, staff
       <div style={{position:"fixed",zIndex:9999,top:"50%",left:"50%",transform:"translate(-50%,-50%)",width:"min(560px,96vw)",maxHeight:"92dvh",background:C.card,border:`1px solid ${C.gold}`,borderRadius:14,display:"flex",flexDirection:"column",overflow:"hidden",boxShadow:"0 24px 64px #000c",fontFamily:"inherit"}}>
         <div style={{background:C.surface,padding:"12px 18px",display:"flex",alignItems:"center",justifyContent:"space-between",flexShrink:0,borderBottom:`1px solid ${C.gold}40`}}>
           <div>
-            <div style={{fontSize:11,fontWeight:700,color:C.gold,letterSpacing:1}}>{t("ADD SHIFT")}</div>
+            <div style={{fontSize:11,fontWeight:700,color:C.gold,letterSpacing:1}}>{t(fixedEmployeeId?"SET SHIFT DETAILS":"ADD SHIFT")}</div>
             <div style={{fontSize:14,fontWeight:800,color:C.text}}>{siteName}</div>
             <div style={{fontSize:12,color:C.muted}}>{dayLabel}</div>
           </div>
           <button onClick={onClose} style={{background:`${C.border}`,border:"none",borderRadius:6,color:C.muted,cursor:"pointer",width:28,height:28,fontSize:16,display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"inherit"}}>×</button>
         </div>
 
-        <div style={{display:"grid",gridTemplateColumns:isMobile?"1fr":"1fr 1fr",flex:1,overflow:isMobile?"auto":"hidden",minHeight:0}}>
-          <div style={{borderRight:isMobile?"none":`1px solid ${C.border}`,borderBottom:isMobile?`1px solid ${C.border}`:"none",display:"flex",flexDirection:"column",overflow:isMobile?"visible":"hidden"}}>
+        <div style={{display:"grid",gridTemplateColumns:fixedEmployeeId?"1fr":isMobile?"1fr":"1fr 1fr",flex:1,overflow:isMobile?"auto":"hidden",minHeight:0}}>
+          {!fixedEmployeeId&&<div style={{borderRight:isMobile?"none":`1px solid ${C.border}`,borderBottom:isMobile?`1px solid ${C.border}`:"none",display:"flex",flexDirection:"column",overflow:isMobile?"visible":"hidden"}}>
             <div style={{padding:"12px 14px 8px",flexShrink:0}}>
               <div style={{fontSize:10,fontWeight:700,color:C.muted,marginBottom:7,letterSpacing:.8}}>{t("EMPLOYEE")}</div>
               <input autoFocus={!isMobile} value={search} onChange={e=>setSearch(e.target.value)} placeholder={t("Search...")}
@@ -47,13 +48,13 @@ export function ShiftModal({siteId: _siteId, siteName, dayLabel, assigned, staff
                     return (
                       <div key={e.id} onClick={()=>!fixedEmployeeId&&setSelEmp(active?null:e.id)}
                         style={{display:"flex",alignItems:"center",gap:8,padding:"8px 10px",borderRadius:8,cursor:fixedEmployeeId?"default":"pointer",background:active?`${C.gold}18`:"transparent",border:`1.5px solid ${active?C.gold:"transparent"}`,marginBottom:2,transition:"all .1s"}}>
-                        <div style={{width:32,height:32,borderRadius:"50%",background:active?C.gold:C.border,color:active?"#000":C.muted,display:"flex",alignItems:"center",justifyContent:"center",fontSize:11,fontWeight:800,flexShrink:0,transition:"all .1s"}}>
+                        <div style={{width:32,height:32,borderRadius:"50%",background:active?roleColor(e.role,e.id):C.border,color:"#fff",display:"flex",alignItems:"center",justifyContent:"center",fontSize:11,fontWeight:800,flexShrink:0,transition:"all .1s"}}>
                           {initials(e.name)}
                         </div>
                         <div style={{flex:1,minWidth:0}}>
                           <div style={{fontSize:13,fontWeight:600,color:C.text,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{e.name}</div>
                           <div style={{display:"flex",alignItems:"center",gap:6,marginTop:3,flexWrap:"wrap"}}>
-                            <span style={{fontSize:10,fontWeight:700,padding:"2px 7px",borderRadius:99,background:`${roleColor(e.role)}18`,color:roleColor(e.role),border:`1px solid ${roleColor(e.role)}55`}}>
+                            <span style={{fontSize:10,fontWeight:700,padding:"2px 7px",borderRadius:99,background:`${roleColor(e.role,e.id)}18`,color:roleColor(e.role,e.id),border:`1px solid ${roleColor(e.role,e.id)}55`}}>
                               {t(e.role === "cleaner" ? "Cleaner" : e.role === "security" ? "Security" : "Supervisor")}
                             </span>
                             <span style={{fontSize:11,color:C.muted}}>{e.stamp||"EU"}</span>
@@ -65,9 +66,13 @@ export function ShiftModal({siteId: _siteId, siteName, dayLabel, assigned, staff
                   })
               }
             </div>
-          </div>
+          </div>}
 
           <div style={{padding:"12px 14px",overflowY:"auto"}}>
+            {fixedEmployee&&<div style={{display:'flex',alignItems:'center',gap:9,padding:'9px 11px',marginBottom:12,borderRadius:8,border:`1px solid ${roleColor(fixedEmployee.role,fixedEmployee.id)}45`,borderLeft:`4px solid ${roleColor(fixedEmployee.role,fixedEmployee.id)}`,background:`${roleColor(fixedEmployee.role,fixedEmployee.id)}0D`}}>
+              <div style={{width:32,height:32,borderRadius:'50%',background:roleColor(fixedEmployee.role,fixedEmployee.id),color:'#fff',display:'grid',placeItems:'center',fontSize:11,fontWeight:800}}>{initials(fixedEmployee.name)}</div>
+              <div><div style={{fontSize:12,fontWeight:800,color:C.text}}>{fixedEmployee.name}</div><div style={{fontSize:10,color:roleColor(fixedEmployee.role,fixedEmployee.id),fontWeight:700}}>{t(fixedEmployee.role==='cleaner'?'Cleaner':fixedEmployee.role==='security'?'Security':'Supervisor')}</div></div>
+            </div>}
             <div style={{fontSize:10,fontWeight:700,color:C.muted,marginBottom:10,letterSpacing:.8}}>{t("SHIFT")}</div>
             <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:6,marginBottom:12}}>
               {SHIFT_PRESETS.map(ps=>{

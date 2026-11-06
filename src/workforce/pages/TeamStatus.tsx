@@ -1,12 +1,12 @@
 import { useState } from 'react';
 import { UserPlus } from 'lucide-react';
-import type { Employee, Role } from '../types';
+import type { Employee, EmployeeRole } from '../types';
 import { Card } from '../components/Card';
 import { Badge } from '../components/Badge';
 import { C, PROFILES, initials, roleColor } from '../constants';
 import { useApp, useI18n } from '../context/AppContext';
 
-type Filter = 'all' | Role;
+type Filter = 'all' | EmployeeRole;
 type Confirmation = { type:'save'|'add'|'delete'; employeeId:string } | null;
 const roleFilters: { value:Filter; label:string; color:string }[] = [
   {value:'all',label:'All',color:C.gold},
@@ -33,7 +33,7 @@ export function TeamStatus() {
   const updateDraft=<K extends keyof Employee>(key:K,value:Employee[K])=>setDraft(current=>current?{...current,[key]:value}:current);
   const beginEdit=(employee:Employee)=>{setDraft({...employee});setIsNewDraft(false);setFormError('');};
   const beginAdd=()=>{
-    const role:Role=filter==='all'?'cleaner':filter;
+    const role:EmployeeRole=filter==='all'?'cleaner':filter;
     setDraft({id:globalThis.crypto?.randomUUID?.()??`employee-${Date.now()}-${Math.random().toString(36).slice(2,8)}`,name:'',role,title:PROFILES[role].title,email:'',stamp:null,hoursUsed:0,hoursLimit:160,holidayBalance:30,holidayEntitlement:30,site:sites.find(site=>site.active)?.id??sites[0]?.id??'',phone:'',address:'',contractStart:'',nationality:'',certExpiry:'',visaExpiry:'',active:true});
     setIsNewDraft(true);setFormError('');
   };
@@ -136,7 +136,7 @@ export function TeamStatus() {
             <div className="workforce-stack" style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10}}>
               {field('Contract start date',draft.contractStart||'',value=>updateDraft('contractStart',value),'date')}
               <label style={{fontSize:11,color:C.muted}}>{t('Site')}<select value={draft.site} onChange={event=>updateDraft('site',event.target.value)} style={{...inputStyle,marginTop:5}}><option value="">{t('Not assigned')}</option>{sites.map(site=><option key={site.id} value={site.id}>{site.name}</option>)}</select></label>
-              <label style={{fontSize:11,color:C.muted}}>{t('Role')}<select value={draft.role} onChange={event=>updateDraft('role',event.target.value as Role)} style={{...inputStyle,marginTop:5}}>{Object.entries(PROFILES).map(([role,profile])=><option key={role} value={role}>{t(profile.title)}</option>)}</select></label>
+              <label style={{fontSize:11,color:C.muted}}>{t('Role')}<select value={draft.role} onChange={event=>updateDraft('role',event.target.value as EmployeeRole)} style={{...inputStyle,marginTop:5}}>{Object.entries(PROFILES).filter(([role])=>role!=='admin').map(([role,profile])=><option key={role} value={role}>{t(profile.title)}</option>)}</select></label>
               <label style={{fontSize:11,color:C.muted}}>{t('Status')}<select value={draft.active?'active':'inactive'} onChange={event=>updateDraft('active',event.target.value==='active')} style={{...inputStyle,marginTop:5}}><option value="active">{t('Active')}</option><option value="inactive">{t('Inactive')}</option></select></label>
             </div>
             <div style={{fontSize:12,fontWeight:800,color:C.text,marginTop:4}}>{t('Holidays and hours')}</div>

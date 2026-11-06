@@ -25,6 +25,7 @@ export const PROFILES: Record<Role, { label: string; title: string; color: strin
   supervisor: { label: "Supervisor",  title: "SUPERVISOR",       color: "#10b981" },
   hr:         { label: "HR",          title: "HR MANAGER",       color: "#f59e0b" },
   director:   { label: "Director",    title: "DIRECTOR / ADMIN", color: "#d97706" },
+  admin:      { label: "Administrator", title: "SYSTEM ADMINISTRATOR", color: "#dc2626" },
 };
 
 export const fictionalEmployeeEmail = (name: string) => {
@@ -33,17 +34,17 @@ export const fictionalEmployeeEmail = (name: string) => {
 };
 
 export const TABS: { id: Tab; label: string; icon: LucideIcon; roles: Role[] }[] = [
-  { id: "dashboard",  label: "Dashboard",        icon: LayoutDashboard, roles: ["cleaner","security","supervisor","hr","director"] },
-  { id: "roster",     label: "Roster / E-mail",  icon: CalendarDays, roles: ["supervisor","hr","director"] },
-  { id: "team",       label: "Team Status",      icon: Users, roles: ["supervisor","hr","director"] },
-  { id: "sites",      label: "Sites & Posts",    icon: MapPin, roles: ["hr","director"] },
-  { id: "swaps",      label: "Swaps & Requests", icon: ArrowLeftRight, roles: ["cleaner","security","supervisor","hr","director"] },
-  { id: "supplies",   label: "Supply Requests",  icon: Package, roles: ["cleaner","security","supervisor","hr","director"] },
-  { id: "reports",    label: "Reports",          icon: BarChart3, roles: ["supervisor","hr","director"] },
-  { id: "certs",      label: "Certificates",     icon: FileBadge, roles: ["hr","director"] },
-  { id: "ponto",      label: "Clock In/Out",     icon: Clock, roles: ["cleaner","security","supervisor","hr","director"] },
-  { id: "audit",      label: "Visual Audit",     icon: Camera, roles: ["supervisor","hr","director"] },
-  { id: "incidents",  label: "Incidents",        icon: TriangleAlert, roles: ["security","supervisor","hr","director"] },
+  { id: "dashboard",  label: "Dashboard",        icon: LayoutDashboard, roles: ["cleaner","security","supervisor","hr","director","admin"] },
+  { id: "roster",     label: "Roster / E-mail",  icon: CalendarDays, roles: ["supervisor","hr","director","admin"] },
+  { id: "team",       label: "Team Status",      icon: Users, roles: ["supervisor","hr","director","admin"] },
+  { id: "sites",      label: "Sites & Posts",    icon: MapPin, roles: ["hr","director","admin"] },
+  { id: "swaps",      label: "Swaps & Requests", icon: ArrowLeftRight, roles: ["cleaner","security","supervisor","hr","director","admin"] },
+  { id: "supplies",   label: "Supply Requests",  icon: Package, roles: ["cleaner","security","supervisor","hr","director","admin"] },
+  { id: "reports",    label: "Reports",          icon: BarChart3, roles: ["supervisor","hr","director","admin"] },
+  { id: "certs",      label: "Certificates",     icon: FileBadge, roles: ["hr","director","admin"] },
+  { id: "ponto",      label: "Clock In/Out",     icon: Clock, roles: ["cleaner","security","supervisor","hr","director","admin"] },
+  { id: "audit",      label: "Visual Audit",     icon: Camera, roles: ["supervisor","hr","director","admin"] },
+  { id: "incidents",  label: "Incidents",        icon: TriangleAlert, roles: ["security","supervisor","hr","director","admin"] },
 ];
 
 const EXTRA_EMPLOYEE_NAMES = [
@@ -133,7 +134,18 @@ export const DAYS14 = Array.from({length:14},(_,i)=>{ const d=new Date(PERIOD_ST
 // Utility Functions
 export const fmt = (d:Date) => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
 export const initials = (n:string) => n.split(" ").slice(0,2).map(x=>x[0]).join("").toUpperCase();
-export const roleColor = (r:Role) => PROFILES[r].color;
+const EMPLOYEE_ROLE_COLORS: Partial<Record<Role, string[]>> = {
+  cleaner: ["#2563eb", "#1d4ed8", "#0284c7", "#0ea5e9", "#3b82f6", "#1e40af", "#0369a1"],
+  security: ["#dc2626", "#b91c1c", "#ef4444", "#f43f5e", "#be123c", "#e11d48", "#991b1b"],
+};
+
+export const roleColor = (r:Role, identity?:string) => {
+  const palette = EMPLOYEE_ROLE_COLORS[r];
+  if (!identity || !palette) return PROFILES[r].color;
+  let hash = 0;
+  for (let index = 0; index < identity.length; index += 1) hash = (hash * 31 + identity.charCodeAt(index)) | 0;
+  return palette[Math.abs(hash) % palette.length] ?? PROFILES[r].color;
+};
 
 // Demo roster so the e-mail preview has data out of the box.
 // To start with an empty roster again, use useState<RosterData>({}) in App.tsx.

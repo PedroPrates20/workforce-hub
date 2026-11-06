@@ -1,4 +1,5 @@
 import { useApp, useI18n } from '../context/AppContext';
+import type { Employee } from '../types';
 import { DOW, MONTHS, localeOf } from '../i18n';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Card } from '../components/Card';
@@ -10,10 +11,19 @@ export function Dashboard() {
   const {user,employees,sites,swaps,roster} = useApp();
   const {lang,t} = useI18n();
   const isMobile = useIsMobile();
-  const emp = employees.find(e=>e.id===user.id);
+  const emp = employees.find(e=>e.id===user.id) ?? (user.role==='admin' ? {
+    ...user,
+    phone:'',
+    address:'',
+    contractStart:'',
+    nationality:'Not specified',
+    certExpiry:'',
+    visaExpiry:'',
+    active:true,
+  } as Employee : undefined);
   if (!emp) return null;
   const siteObj = sites.find(s=>s.id===emp.site);
-  const showManagementStats = user.role === 'hr' || user.role === 'director';
+  const showManagementStats = user.role === 'hr' || user.role === 'director' || user.role === 'admin';
   const todayDate = new Date();
   todayDate.setHours(0, 0, 0, 0);
   const weekStart = new Date(todayDate);

@@ -78,6 +78,17 @@ const PT: Record<string, string> = {
   "Current permissions on file": "Permissões atualmente cadastradas",
   "Expired or due within 90 days": "Vencidos ou a vencer em até 90 dias",
   "Employee": "Funcionário",
+  "Available employees": "Funcionários disponíveis",
+  "Drag an employee to a day, or select one and tap a date.": "Arraste um funcionário para o dia ou selecione-o e clique ou toque em uma data.",
+  "Drag an employee to a day, or select one and click or tap a date.": "Arraste um funcionário para o dia ou selecione-o e clique ou toque em uma data.",
+  "Selected": "Selecionado",
+  "Drop an employee here": "Solte um funcionário aqui",
+  "Tap to assign selected employee": "Clique ou toque para escalar o funcionário selecionado",
+  "Click or tap to assign selected employee": "Clique ou toque para escalar o funcionário selecionado",
+  "Drop employee on a day · Maximum 7 shifts per day": "Solte o funcionário no dia · Máximo de 7 turnos por dia",
+  "This employee is already assigned to this day.": "Este funcionário já está escalado para este dia.",
+  "Maximum 7 shifts per day reached.": "O limite de 7 turnos por dia foi atingido.",
+  "SET SHIFT DETAILS": "DEFINIR DETALHES DO TURNO",
   "Role": "Função",
   "Hours recorded": "Horas registradas",
   "Configured hours limit": "Limite de horas configurado",
@@ -135,6 +146,11 @@ const PT: Record<string, string> = {
   "Supervisor": "Supervisor",
   "HR": "RH",
   "Director": "Diretor",
+  "Administrator": "Administrador",
+  "SYSTEM ADMINISTRATOR": "ADMINISTRADOR DO SISTEMA",
+  "ACCESS HIERARCHY": "HIERARQUIA DE ACESSO",
+  "Access levels": "Níveis de acesso",
+  "Demo role shortcuts only. Secure individual accounts require an authentication provider.": "Atalhos de perfil apenas para demonstração. Contas individuais seguras exigem um provedor de autenticação.",
   "All": "Todos",
   "CLEANER / OP": "LIMPEZA / OP",
   "SECURITY": "SEGURANÇA",
@@ -649,6 +665,12 @@ const RU_EXTRA11: Record<string, string> = {
 const RO_EXTRA11: Record<string, string> = {
   "View more":"Vezi mai mult","Site details":"Detaliile locației","Edit site details":"Editează detaliile locației","Cleaners required":"Personal de curățenie necesar","Security staff required":"Personal de securitate necesar","Building manager phone":"Telefonul administratorului clădirii","Operating hours":"Program de funcționare","currently assigned":"atribuiți în prezent","e.g. Mon–Fri, 07:00–19:00":"ex.: Lun–Vin, 07:00–19:00"
 };
+const RU_AUTH: Record<string, string> = {
+  "Administrator":"Администратор","SYSTEM ADMINISTRATOR":"СИСТЕМНЫЙ АДМИНИСТРАТОР","ACCESS HIERARCHY":"УРОВНИ ДОСТУПА","Access levels":"Уровни доступа","Demo role shortcuts only. Secure individual accounts require an authentication provider.":"Это только демонстрационные профили. Для защищённых личных учётных записей нужен провайдер аутентификации.","Available employees":"Доступные сотрудники","Drag an employee to a day, or select one and tap a date.":"Перетащите сотрудника на день или выберите его и нажмите дату.","Drag an employee to a day, or select one and click or tap a date.":"Перетащите сотрудника на день или выберите его и нажмите дату.","Selected":"Выбрано","Drop an employee here":"Перетащите сотрудника сюда","Tap to assign selected employee":"Нажмите, чтобы назначить выбранного сотрудника","Click or tap to assign selected employee":"Нажмите, чтобы назначить выбранного сотрудника","Drop employee on a day · Maximum 7 shifts per day":"Перетащите сотрудника на день · Не более 7 смен в день","This employee is already assigned to this day.":"Этот сотрудник уже назначен на этот день.","Maximum 7 shifts per day reached.":"Достигнут лимит — 7 смен в день.","SET SHIFT DETAILS":"НАСТРОИТЬ ДЕТАЛИ СМЕНЫ"
+};
+const RO_AUTH: Record<string, string> = {
+  "Administrator":"Administrator","SYSTEM ADMINISTRATOR":"ADMINISTRATOR DE SISTEM","ACCESS HIERARCHY":"Ierarhia accesului","Access levels":"Niveluri de acces","Demo role shortcuts only. Secure individual accounts require an authentication provider.":"Acestea sunt doar profiluri demonstrative. Conturile individuale securizate necesită un furnizor de autentificare.","Available employees":"Angajați disponibili","Drag an employee to a day, or select one and tap a date.":"Trage un angajat într-o zi sau selectează-l și atinge o dată.","Drag an employee to a day, or select one and click or tap a date.":"Trage un angajat într-o zi sau selectează-l și apasă sau atinge o dată.","Selected":"Selectat","Drop an employee here":"Plasează un angajat aici","Tap to assign selected employee":"Atinge pentru a programa angajatul selectat","Click or tap to assign selected employee":"Apasă sau atinge pentru a programa angajatul selectat","Drop employee on a day · Maximum 7 shifts per day":"Plasează angajatul într-o zi · Maximum 7 ture pe zi","This employee is already assigned to this day.":"Acest angajat este deja programat în această zi.","Maximum 7 shifts per day reached.":"A fost atinsă limita de 7 ture pe zi.","SET SHIFT DETAILS":"SETARE DETALII TURĂ"
+};
 const RU_EXTRA12: Record<string, string> = {
   "Email draft opened. Press Send in your email app to deliver it.":"Черновик письма открыт. Нажмите «Отправить» в почтовом приложении.","No valid email address is available for this notification.":"Для этого уведомления нет действительного адреса электронной почты.","No HR or supervisor email is configured for this request.":"Для этого запроса не указан адрес отдела кадров или руководителя.","No director email is configured for this request.":"Для этого запроса не указан адрес директора.","This is a prototype email draft. Press Send in your email app to deliver it.":"Это черновик письма прототипа. Нажмите «Отправить» в почтовом приложении.","Request reference: {reference}":"Номер запроса: {reference}","Request status":"Статус запроса","New shift request · {reference}":"Новый запрос на замену смены · {reference}","Shift request {status} · {reference}":"Запрос на замену смены: {status} · {reference}","Holiday request received · {reference}":"Запрос на отпуск получен · {reference}","Holiday request sent for director approval · {reference}":"Запрос на отпуск отправлен директору · {reference}","Holiday request rejected · {reference}":"Запрос на отпуск отклонён · {reference}","Holiday request {status} · {reference}":"Запрос на отпуск: {status} · {reference}","Supply request received · {reference}":"Запрос материалов получен · {reference}","Supply request {status} · {reference}":"Запрос материалов: {status} · {reference}","Holiday request requires HR review, followed by director approval.":"Запрос на отпуск должен проверить отдел кадров, затем его утверждает директор.","HR reviewed this holiday request. Director decision required.":"Отдел кадров проверил запрос на отпуск. Требуется решение директора.","Your holiday request was rejected by HR.":"Ваш запрос на отпуск отклонён отделом кадров.","Your holiday request was approved.":"Ваш запрос на отпуск одобрен.","Your holiday request was rejected.":"Ваш запрос на отпуск отклонён.","Your supply request was approved.":"Ваш запрос материалов одобрен.","Your supply request was rejected.":"Ваш запрос материалов отклонён."
 };
@@ -658,8 +680,8 @@ const RO_EXTRA12: Record<string, string> = {
 
 const DICTIONARIES: Partial<Record<Lang, Record<string, string>>> = {
   pt: PT,
-  ru: { ...RU, ...RU_EXTRA, ...RU_EXTRA2, ...RU_EXTRA3, ...RU_EXTRA4, ...RU_EXTRA5, ...RU_EXTRA6, ...RU_EXTRA7, ...RU_EXTRA8, ...RU_EXTRA9, ...RU_EXTRA10, ...RU_EXTRA11, ...RU_EXTRA12, ...RU_DASHBOARD },
-  ro: { ...RO, ...RO_EXTRA, ...RO_EXTRA2, ...RO_EXTRA3, ...RO_EXTRA4, ...RO_EXTRA5, ...RO_EXTRA6, ...RO_EXTRA7, ...RO_EXTRA8, ...RO_EXTRA9, ...RO_EXTRA10, ...RO_EXTRA11, ...RO_EXTRA12, ...RO_DASHBOARD },
+  ru: { ...RU, ...RU_EXTRA, ...RU_EXTRA2, ...RU_EXTRA3, ...RU_EXTRA4, ...RU_EXTRA5, ...RU_EXTRA6, ...RU_EXTRA7, ...RU_EXTRA8, ...RU_EXTRA9, ...RU_EXTRA10, ...RU_EXTRA11, ...RU_EXTRA12, ...RU_DASHBOARD, ...RU_AUTH },
+  ro: { ...RO, ...RO_EXTRA, ...RO_EXTRA2, ...RO_EXTRA3, ...RO_EXTRA4, ...RO_EXTRA5, ...RO_EXTRA6, ...RO_EXTRA7, ...RO_EXTRA8, ...RO_EXTRA9, ...RO_EXTRA10, ...RO_EXTRA11, ...RO_EXTRA12, ...RO_DASHBOARD, ...RO_AUTH },
 };
 
 export const makeT = (lang: Lang): TFn => (en, vars) => {

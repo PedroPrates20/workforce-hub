@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import type { DragEvent } from 'react';
 import type { RosterStaffFilter } from '../types';
 import { useApp, useI18n } from '../context/AppContext';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -6,7 +7,7 @@ import { DOW, MONTHS, localeOf } from '../i18n';
 import { ShiftModal } from '../components/ShiftModal';
 import { EmailPreviewModal } from '../components/EmailPreviewModal';
 import { Badge } from '../components/Badge';
-import { C, SHIFT_PRESETS, DAYS14, fmt, initials } from '../constants';
+import { C, SHIFT_PRESETS, DAYS14, fmt, initials, roleColor } from '../constants';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 function getShiftPreset(start:string) {
@@ -23,7 +24,10 @@ export function Roster() {
   const [activeEmployee, setActiveEmployee] = useState("");
   const [siteFilter, setSiteFilter] = useState("");
   const [employeeFilter, setEmployeeFilter] = useState("");
-  const [modal, setModal] = useState<{siteId:string; dayKey:string}|null>(null);
+  const [selectedEmployee, setSelectedEmployee] = useState("");
+  const [dropTarget, setDropTarget] = useState("");
+  const [dropNotice, setDropNotice] = useState("");
+  const [modal, setModal] = useState<{siteId:string; dayKey:string; employeeId?:string}|null>(null);
   const [showEmail,setShowEmail]=useState(false);
 
   useEffect(()=>{
@@ -54,6 +58,29 @@ export function Roster() {
   };
   const rosterEmployees=employees.filter(employee=>employee.active&&staffMatches(employee.id));
   const filteredEmployees=rosterEmployees.filter(employee=>employee.name.toLowerCase().includes(employeeFilter.trim().toLowerCase()));
+  const scheduleEmployeeOnDay=(employeeId:string,dayKey:string)=>{
+    const employee=employees.find(item=>item.id===employeeId);
+    if(!employee||!employee.active||!staffMatches(employeeId))return;
+    const currentSlots=roster[dayKey]?.[activeSite]??[];
+    if(currentSlots.some(slot=>slot.empId===employeeId)){
+      setDropNotice(t('This employee is already assigned to this day.'));
+      return;
+    }
+    if(currentSlots.length>=7){
+      setDropNotice(t('Maximum 7 shifts per day reached.'));
+      return;
+    }
+    setDropNotice('');
+    setSelectedEmployee(employeeId);
+    if(rosterView==='employees')setActiveEmployee(employeeId);
+    setModal({siteId:activeSite,dayKey,employeeId});
+  };
+  const handleCalendarDrop=(event:DragEvent,dayKey:string)=>{
+    event.preventDefault();
+    const employeeId=event.dataTransfer.getData('text/plain');
+    setDropTarget('');
+    if(employeeId)scheduleEmployeeOnDay(employeeId,dayKey);
+  };
   const slotsFor=(dayKey:string,siteId:string)=>
     (roster[dayKey]?.[siteId]||[]).filter(slot=>staffMatches(slot.empId)&&(rosterView==='sites'||slot.empId===activeEmployee));
   const totalSlots=DAYS14.reduce((sum,date)=>sum+Object.values(roster[fmt(date)]||{}).flat().filter(slot=>staffMatches(slot.empId)).length,0);
@@ -69,7 +96,8 @@ export function Roster() {
   useEffect(()=>{
     if(rosterEmployees.length>0&&!rosterEmployees.some(employee=>employee.id===activeEmployee))setActiveEmployee(rosterEmployees[0].id);
     if(rosterEmployees.length===0&&activeEmployee)setActiveEmployee('');
-  },[rosterEmployees,activeEmployee]);
+    if(selectedEmployee&&!rosterEmployees.some(employee=>employee.id===selectedEmployee))setSelectedEmployee('');
+  },[rosterEmployees,activeEmployee,selectedEmployee]);
 
   const formatWeekRange = (week: Date[]) => {
     const first = week[0];
@@ -112,7 +140,7 @@ export function Roster() {
           {staffFilterOptions.map(option=><button key={option.value} onClick={()=>setStaffFilter(option.value)} aria-pressed={staffFilter===option.value}
             style={{padding:'8px 13px',borderRadius:8,border:`1px solid ${staffFilter===option.value?C.gold:C.border}`,background:staffFilter===option.value?`${C.gold}18`:C.card,color:staffFilter===option.value?C.gold:C.text,fontWeight:700,fontSize:12,cursor:'pointer',fontFamily:'inherit'}}>{t(option.label)}</button>)}
         </div>
-        <div style={{display:'grid',gridTemplateColumns:rosterView==='employees'?'repeat(auto-fit,minmax(min(100%,320px),1fr))':'minmax(0,360px)',gap:14}}>
+        <div style={{display:'grid',gridTemplateColumns:'minmax(0,360px)',gap:14}}>
           <div style={{minWidth:0}}>
             <label style={{display:'block',fontSize:11,fontWeight:700,color:C.muted,marginBottom:6}}>{t('Site')}</label>
             <input value={siteFilter} onChange={e=>setSiteFilter(e.target.value)} placeholder={t("Filter sites...")} aria-label={t("Filter sites...")} style={{width:"100%",height:40,boxSizing:"border-box",padding:"0 12px",marginBottom:8,border:`1px solid ${C.border}`,borderRadius:8,background:C.card,color:C.text,fontSize:13,fontFamily:"inherit",outlineColor:C.gold}} />
@@ -124,32 +152,41 @@ export function Roster() {
               </SelectContent>
             </Select>
           </div>
-          {rosterView==='employees'&&<div style={{minWidth:0}}>
-            <label style={{display:'block',fontSize:11,fontWeight:700,color:C.muted,marginBottom:6}}>{t('Employee')}</label>
-            <input value={employeeFilter} onChange={e=>setEmployeeFilter(e.target.value)} placeholder={t("Filter employees...")} aria-label={t("Filter employees...")} style={{width:"100%",height:40,boxSizing:"border-box",padding:"0 12px",marginBottom:8,border:`1px solid ${C.border}`,borderRadius:8,background:C.card,color:C.text,fontSize:13,fontFamily:"inherit",outlineColor:C.gold}} />
-            <Select value={activeEmployee} onValueChange={setActiveEmployee}>
-              <SelectTrigger aria-label={t("Employees")} className="h-10 w-full rounded-lg border-[#e2e6ec] bg-white px-3 text-[13px] text-[#1b2638] shadow-none focus:ring-1 focus:ring-[#e8661c]"><SelectValue>{employees.find(e=>e.id===activeEmployee)?.name||""}</SelectValue></SelectTrigger>
-              <SelectContent className="border-[#e2e6ec] bg-white text-[#1b2638]">{filteredEmployees.map(e=><SelectItem key={e.id} value={e.id} className="text-[13px] focus:bg-[#f4f6f9] focus:text-[#1b2638]">{e.name}</SelectItem>)}{filteredEmployees.length===0&&<SelectItem value="__no_employees" disabled className="text-[13px] text-[#5d6b80]">{t("No employees found")}</SelectItem>}</SelectContent>
-            </Select>
-          </div>}
         </div>
       </section>
 
-      {/* Current site */}
-      <div style={{
-        display:"flex",alignItems:"center",flexWrap:"wrap",gap:10,marginBottom:12,
-        padding:"12px 14px",background:C.card,border:`1px solid ${C.border}`,
-        borderRadius:10
-      }}>
+      <div style={{display:"flex",alignItems:"center",flexWrap:"wrap",gap:10,marginBottom:12,padding:"12px 14px",background:C.card,border:`1px solid ${C.border}`,borderRadius:10}}>
         <div style={{width:4,height:28,background:C.gold,borderRadius:99}}/>
-        <div>
-          <div style={{fontWeight:800,fontSize:15,color:C.text}}>{site.name}</div>
-          <div style={{fontSize:11,color:C.muted,marginTop:2}}>{site.client}</div>
-        </div>
-        <div style={{fontSize:11,color:C.muted,marginLeft:"auto",textAlign:"right"}}>
-          {t("Select a day to add a shift · Maximum 7 shifts per day")}
-        </div>
+        <div><div style={{fontWeight:800,fontSize:15,color:C.text}}>{site.name}</div><div style={{fontSize:11,color:C.muted,marginTop:2}}>{site.client}</div></div>
+        <div style={{fontSize:11,color:C.muted,marginLeft:"auto",textAlign:"right"}}>{t("Drop employee on a day · Maximum 7 shifts per day")}</div>
       </div>
+
+      <section aria-labelledby="available-roster-employees" style={{padding:14,marginBottom:18,background:C.card,border:`1px solid ${C.border}`,borderRadius:10}}>
+        <div style={{display:'flex',alignItems:'flex-start',justifyContent:'space-between',gap:12,flexWrap:'wrap',marginBottom:10}}>
+          <div>
+            <h2 id="available-roster-employees" style={{margin:0,fontSize:14,fontWeight:800,color:C.text}}>{t('Available employees')} <span style={{fontSize:11,fontWeight:600,color:C.muted}}>({filteredEmployees.length})</span></h2>
+            <div style={{fontSize:11,color:C.muted,marginTop:4}}>{t('Drag an employee to a day, or select one and click or tap a date.')}</div>
+          </div>
+          <input value={employeeFilter} onChange={event=>setEmployeeFilter(event.target.value)} placeholder={t('Filter employees...')} aria-label={t('Filter employees...')} style={{width:'min(100%,300px)',height:38,boxSizing:'border-box',padding:'0 11px',border:`1px solid ${C.border}`,borderRadius:8,background:C.card,color:C.text,fontSize:12,fontFamily:'inherit',outlineColor:C.gold}} />
+        </div>
+        {dropNotice&&<div role="alert" style={{fontSize:11,color:C.red,marginBottom:9}}>{dropNotice}</div>}
+        <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(min(100%,190px),1fr))',gap:7,maxHeight:210,overflowY:'auto',padding:2}}>
+          {filteredEmployees.map(employee=>{
+            const employeeColor=roleColor(employee.role,employee.id);
+            const active=selectedEmployee===employee.id;
+            const roleLabel=employee.role==='cleaner'?'Cleaner':employee.role==='security'?'Security':'Supervisor';
+            return <button key={employee.id} type="button" draggable
+              onDragStart={event=>{event.dataTransfer.setData('text/plain',employee.id);event.dataTransfer.effectAllowed='copy';setSelectedEmployee(employee.id);setDropNotice('');}}
+              onClick={()=>{setSelectedEmployee(active?'':employee.id);if(rosterView==='employees')setActiveEmployee(employee.id);setDropNotice('');}}
+              aria-pressed={active|| (rosterView==='employees'&&activeEmployee===employee.id)}
+              style={{display:'flex',alignItems:'center',gap:8,minWidth:0,padding:'8px 9px',borderRadius:8,border:`1px solid ${active?employeeColor:C.border}`,borderLeft:`4px solid ${employeeColor}`,background:active?`${employeeColor}12`:C.card,color:C.text,cursor:'grab',textAlign:'left',fontFamily:'inherit'}}>
+              <span style={{width:29,height:29,display:'grid',placeItems:'center',borderRadius:'50%',background:employeeColor,color:'#fff',fontSize:10,fontWeight:800,flexShrink:0}}>{initials(employee.name)}</span>
+              <span style={{minWidth:0,display:'flex',flexDirection:'column',gap:2}}><span style={{fontSize:11,fontWeight:700,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{employee.name}</span><span style={{fontSize:9,fontWeight:700,color:employeeColor}}>{t(roleLabel)}{active?' · '+t('Selected'):''}</span></span>
+            </button>;
+          })}
+          {filteredEmployees.length===0&&<div style={{gridColumn:'1 / -1',padding:12,color:C.muted,fontSize:12}}>{t('No employees found')}</div>}
+        </div>
+      </section>
 
       {/* Calendar */}
       {isMobile ? (
@@ -166,7 +203,13 @@ export function Roster() {
                   const slots=slotsFor(dk,activeSite);
                   const we=[0,6].includes(d.getDay());
                   return (
-                    <div key={dk} style={{background:we?"#fffaf4":C.card,border:`1px solid ${C.border}`,borderRadius:10,padding:"10px 12px",display:"flex",gap:12,alignItems:"flex-start"}}>
+                    <div key={dk} data-drop-target={dropTarget===dk||undefined}
+                      onDragOver={event=>{event.preventDefault();event.dataTransfer.dropEffect='copy';setDropTarget(dk);}}
+                      onDragEnter={event=>{event.preventDefault();setDropTarget(dk);}}
+                      onDragLeave={event=>{if(!event.currentTarget.contains(event.relatedTarget as Node|null))setDropTarget('');}}
+                      onDrop={event=>handleCalendarDrop(event,dk)}
+                      onClick={event=>{if((event.target as HTMLElement).closest('button'))return;if(selectedEmployee)scheduleEmployeeOnDay(selectedEmployee,dk);}}
+                      style={{background:dropTarget===dk?`${C.gold}12`:we?"#fffaf4":C.card,border:`1px ${dropTarget===dk?'dashed':'solid'} ${dropTarget===dk?C.gold:C.border}`,boxShadow:dropTarget===dk?`inset 0 0 0 2px ${C.gold}35`:undefined,borderRadius:10,padding:"10px 12px",display:"flex",gap:12,alignItems:"flex-start",cursor:selectedEmployee?'pointer':'default'}}>
                       <div style={{width:44,textAlign:"center",flexShrink:0}}>
                         <div style={{fontSize:10,fontWeight:800,color:we?"#c46b00":C.muted,textTransform:"uppercase"}}>{DOW[lang][d.getDay()]}</div>
                         <div style={{fontSize:20,fontWeight:800,color:we?"#c46b00":C.text}}>{d.getDate()}</div>
@@ -177,11 +220,12 @@ export function Roster() {
                         {slots.map(sl=>{
                           const emp=employees.find(e=>e.id===sl.empId);
                           const ps=getShiftPreset(sl.start)!;
+                          const employeeColor=emp?roleColor(emp.role,emp.id):ps.color;
                           return emp ? (
-                            <div key={sl.empId} style={{display:"flex",alignItems:"center",gap:8,border:`1px solid ${ps.color}45`,borderLeft:`4px solid ${ps.color}`,borderRadius:8,background:ps.bg+"16",padding:"6px 8px"}}>
-                              <div style={{width:26,height:26,borderRadius:"50%",background:ps.color,color:"#fff",display:"flex",alignItems:"center",justifyContent:"center",fontSize:10,fontWeight:800,flexShrink:0}}>{initials(emp.name)}</div>
+                            <div key={sl.empId} style={{display:"flex",alignItems:"center",gap:8,border:`1px solid ${employeeColor}45`,borderLeft:`4px solid ${employeeColor}`,borderRadius:8,background:ps.bg+"16",padding:"6px 8px"}}>
+                              <div style={{width:26,height:26,borderRadius:"50%",background:employeeColor,color:"#fff",display:"flex",alignItems:"center",justifyContent:"center",fontSize:10,fontWeight:800,flexShrink:0}}>{initials(emp.name)}</div>
                               <div style={{flex:1,minWidth:0}}>
-                                <div style={{fontSize:13,fontWeight:800,color:C.text,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{emp.name}</div>
+                                <div style={{display:'flex',alignItems:'center',gap:6,flexWrap:'wrap'}}><div style={{fontSize:13,fontWeight:800,color:C.text,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{emp.name}</div><Badge label={t(emp.role==='cleaner'?'Cleaner':emp.role==='security'?'Security':'Supervisor')} color={employeeColor}/></div>
                                 <div style={{fontSize:11,color:C.muted}}>{t(ps.label)} · {sl.start}–{sl.end}</div>
                               </div>
                               <button onClick={()=>removeSlot(dk,activeSite,sl.empId)} aria-label={t("Remove {name}",{name:emp.name})} title={t("Remove shift")}
@@ -189,12 +233,7 @@ export function Roster() {
                             </div>
                           ) : null;
                         })}
-                        {(roster[dk]?.[activeSite]||[]).length<7 && (
-                          <button onClick={()=>setModal({siteId:activeSite,dayKey:dk})}
-                            style={{width:"100%",minHeight:38,border:`1px dashed ${C.border}`,borderRadius:8,background:"transparent",color:C.muted,cursor:"pointer",fontSize:13,fontWeight:600,fontFamily:"inherit"}}>
-                            {t("+ Add shift")}
-                          </button>
-                        )}
+                        {(roster[dk]?.[activeSite]||[]).length<7&&<div style={{width:'100%',minHeight:34,display:'grid',placeItems:'center',boxSizing:'border-box',border:`1px dashed ${dropTarget===dk?C.gold:C.border}`,borderRadius:8,color:selectedEmployee?C.gold:C.muted,fontSize:10,fontWeight:700}}>{selectedEmployee?t('Click or tap to assign selected employee'):t('Drop an employee here')}</div>}
                       </div>
                     </div>
                   );
@@ -273,11 +312,19 @@ export function Roster() {
                       const we=[0,6].includes(d.getDay());
 
                       return (
-                        <td key={dk} style={{
+                        <td key={dk} data-drop-target={dropTarget===dk||undefined}
+                          onDragOver={event=>{event.preventDefault();event.dataTransfer.dropEffect='copy';setDropTarget(dk);}}
+                          onDragEnter={event=>{event.preventDefault();setDropTarget(dk);}}
+                          onDragLeave={event=>{if(!event.currentTarget.contains(event.relatedTarget as Node|null))setDropTarget('');}}
+                          onDrop={event=>handleCalendarDrop(event,dk)}
+                          onClick={event=>{if((event.target as HTMLElement).closest('button'))return;if(selectedEmployee)scheduleEmployeeOnDay(selectedEmployee,dk);}}
+                          style={{
                           padding:"10px",verticalAlign:"top",
-                          background:we?"#fffaf4":C.card,
+                          background:dropTarget===dk?`${C.gold}12`:we?"#fffaf4":C.card,
                           borderRight:`1px solid ${C.border}`,
-                          minHeight:145,height:150
+                          outline:dropTarget===dk?`2px dashed ${C.gold}`:undefined,
+                          outlineOffset:dropTarget===dk?'-3px':undefined,
+                          minHeight:145,height:150,cursor:selectedEmployee?'pointer':'default'
                         }}>
                           {slots.length === 0 ? (
                             <div style={{
@@ -292,38 +339,19 @@ export function Roster() {
                                 {t("Day off")}
                               </div>
 
-                              <button
-                                onClick={()=>setModal({siteId:activeSite,dayKey:dk})}
-                                style={{
-                                  border:`1px dashed ${C.border}`,borderRadius:7,
-                                  padding:"7px 12px",background:"transparent",
-                                  color:C.muted,cursor:"pointer",
-                                  fontSize:11,fontWeight:600,fontFamily:"inherit"
-                                }}
-                                onMouseEnter={e=>{
-                                  (e.currentTarget as HTMLButtonElement).style.borderColor=C.gold;
-                                  (e.currentTarget as HTMLButtonElement).style.color=C.gold;
-                                  (e.currentTarget as HTMLButtonElement).style.background=`${C.gold}10`;
-                                }}
-                                onMouseLeave={e=>{
-                                  (e.currentTarget as HTMLButtonElement).style.borderColor=C.border;
-                                  (e.currentTarget as HTMLButtonElement).style.color=C.muted;
-                                  (e.currentTarget as HTMLButtonElement).style.background="transparent";
-                                }}
-                              >
-                                {t("+ Add shift")}
-                              </button>
+                              <div style={{minHeight:30,width:'100%',display:'grid',placeItems:'center',boxSizing:'border-box',border:`1px dashed ${dropTarget===dk?C.gold:C.border}`,borderRadius:7,color:selectedEmployee?C.gold:C.muted,fontSize:10,fontWeight:700}}>{selectedEmployee?t('Click or tap to assign selected employee'):t('Drop an employee here')}</div>
                             </div>
                           ) : (
                             <div style={{display:"flex",flexDirection:"column",gap:7}}>
                               {slots.map(sl=>{
                                 const emp=employees.find(e=>e.id===sl.empId);
                                 const ps=getShiftPreset(sl.start)!;
+                                const employeeColor=emp?roleColor(emp.role,emp.id):ps.color;
 
                                 return emp ? (
                                   <div key={sl.empId} style={{
-                                    border:`1px solid ${ps.color}45`,
-                                    borderLeft:`4px solid ${ps.color}`,
+                                    border:`1px solid ${employeeColor}45`,
+                                    borderLeft:`4px solid ${employeeColor}`,
                                     borderRadius:8,background:ps.bg+"16",
                                     padding:"9px 9px 8px"
                                   }}>
@@ -333,7 +361,7 @@ export function Roster() {
                                     }}>
                                       <div style={{
                                         width:25,height:25,borderRadius:"50%",
-                                        background:ps.color,color:"#fff",
+                                        background:employeeColor,color:"#fff",
                                         display:"flex",alignItems:"center",
                                         justifyContent:"center",
                                         fontSize:9,fontWeight:800,flexShrink:0
@@ -349,6 +377,7 @@ export function Roster() {
                                       }}>
                                         {emp.name}
                                       </div>
+                                      <Badge label={t(emp.role==='cleaner'?'Cleaner':emp.role==='security'?'Security':'Supervisor')} color={employeeColor}/>
 
                                       <button
                                         onClick={()=>removeSlot(dk,activeSite,sl.empId)}
@@ -375,29 +404,7 @@ export function Roster() {
                                   </div>
                                 ) : null;
                               })}
-
-                              {(roster[dk]?.[activeSite]||[]).length<7 && (
-                                <button
-                                  onClick={()=>setModal({siteId:activeSite,dayKey:dk})}
-                                  style={{
-                                    width:"100%",border:`1px dashed ${C.border}`,
-                                    borderRadius:7,padding:"7px 0",
-                                    background:"transparent",color:C.muted,
-                                    cursor:"pointer",fontSize:11,fontWeight:600,
-                                    fontFamily:"inherit"
-                                  }}
-                                  onMouseEnter={e=>{
-                                    (e.currentTarget as HTMLButtonElement).style.borderColor=C.gold;
-                                    (e.currentTarget as HTMLButtonElement).style.color=C.gold;
-                                  }}
-                                  onMouseLeave={e=>{
-                                    (e.currentTarget as HTMLButtonElement).style.borderColor=C.border;
-                                    (e.currentTarget as HTMLButtonElement).style.color=C.muted;
-                                  }}
-                                >
-                                  {t("+ Add shift")}
-                                </button>
-                              )}
+                              {(roster[dk]?.[activeSite]||[]).length<7&&<div style={{minHeight:30,width:'100%',display:'grid',placeItems:'center',boxSizing:'border-box',border:`1px dashed ${dropTarget===dk?C.gold:C.border}`,borderRadius:7,color:selectedEmployee?C.gold:C.muted,fontSize:10,fontWeight:700}}>{selectedEmployee?t('Click or tap to assign selected employee'):t('Drop an employee here')}</div>}
                             </div>
                           )}
                         </td>
@@ -431,7 +438,7 @@ export function Roster() {
           dayLabel={`${DOW[lang][DAYS14.find(d=>fmt(d)===modal.dayKey)?.getDay()||0]}, ${DAYS14.find(d=>fmt(d)===modal.dayKey)?.getDate()} ${MONTHS[lang][DAYS14.find(d=>fmt(d)===modal.dayKey)?.getMonth()||0]}`}
           assigned={(roster[modal.dayKey]?.[modal.siteId]||[]).map(s=>s.empId)}
           staffFilter={staffFilter}
-          fixedEmployeeId={rosterView==='employees'?activeEmployee:undefined}
+          fixedEmployeeId={modal.employeeId??(rosterView==='employees'?activeEmployee:undefined)}
           onAdd={addSlot}
           onClose={()=>setModal(null)}
         />

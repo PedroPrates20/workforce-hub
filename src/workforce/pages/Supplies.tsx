@@ -14,7 +14,7 @@ const CATEGORIES: SupplyRequest['category'][] = ['Cleaning supplies', 'Security 
 export function Supplies() {
   const { user, employees, sites, supplyRequests, setSupplyRequests } = useApp();
   const { lang, t } = useI18n();
-  const canApprove = ['supervisor', 'hr', 'director'].includes(user.role);
+  const canApprove = ['supervisor', 'hr', 'director', 'admin'].includes(user.role);
   const [siteId, setSiteId] = useState(user.site || sites.find(site => site.active)?.id || '');
   const requestSiteId = canApprove ? siteId : user.site;
   const [category, setCategory] = useState<SupplyRequest['category']>('Cleaning supplies');
