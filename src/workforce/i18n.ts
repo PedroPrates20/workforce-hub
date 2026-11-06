@@ -39,6 +39,10 @@ const PT: Record<string, string> = {
   "Open duplicate supply request warning": "Já existe um pedido pendente deste material para este local nos últimos 3 dias. Verifique com o seu supervisor antes de pedir novamente.",
   "No site assigned to your account": "Nenhum local está associado à sua conta",
   "Email draft opened. Press Send in your email app to deliver it.": "Rascunho de e-mail aberto. Pressione Enviar no seu aplicativo de e-mail para concluir o envio.",
+  "Copy formatted roster": "Copiar escala formatada",
+  "Roster copied. Paste it into the e-mail body.": "Escala copiada. Cole no corpo do e-mail.",
+  "Roster text copied. Paste it into the e-mail body.": "Texto da escala copiado. Cole no corpo do e-mail.",
+  "Could not copy roster. Allow clipboard access and try again.": "Não foi possível copiar a escala. Permita o acesso à área de transferência e tente novamente.",
   "No valid email address is available for this notification.": "Não há um endereço de e-mail válido para esta notificação.",
   "No HR or supervisor email is configured for this request.": "Não há e-mail de RH ou supervisor cadastrado para este pedido.",
   "No director email is configured for this request.": "Não há e-mail de diretor cadastrado para este pedido.",
@@ -678,10 +682,23 @@ const RO_EXTRA12: Record<string, string> = {
   "Email draft opened. Press Send in your email app to deliver it.":"Ciorna de e-mail a fost deschisă. Apasă Trimite în aplicația de e-mail.","No valid email address is available for this notification.":"Nu există o adresă de e-mail validă pentru această notificare.","No HR or supervisor email is configured for this request.":"Nu este configurată o adresă de e-mail HR sau a supervizorului pentru această solicitare.","No director email is configured for this request.":"Nu este configurată o adresă de e-mail a directorului pentru această solicitare.","This is a prototype email draft. Press Send in your email app to deliver it.":"Aceasta este o ciornă de e-mail a prototipului. Apasă Trimite în aplicația de e-mail.","Request reference: {reference}":"Referința solicitării: {reference}","Request status":"Starea solicitării","New shift request · {reference}":"Solicitare nouă de înlocuire a turei · {reference}","Shift request {status} · {reference}":"Solicitare de înlocuire {status} · {reference}","Holiday request received · {reference}":"Cerere de concediu primită · {reference}","Holiday request sent for director approval · {reference}":"Cerere de concediu trimisă directorului pentru aprobare · {reference}","Holiday request rejected · {reference}":"Cerere de concediu respinsă · {reference}","Holiday request {status} · {reference}":"Cerere de concediu {status} · {reference}","Supply request received · {reference}":"Solicitare de materiale primită · {reference}","Supply request {status} · {reference}":"Solicitare de materiale {status} · {reference}","Holiday request requires HR review, followed by director approval.":"Cererea de concediu trebuie verificată de HR și apoi aprobată de director.","HR reviewed this holiday request. Director decision required.":"HR a verificat cererea de concediu. Este necesară decizia directorului.","Your holiday request was rejected by HR.":"Cererea ta de concediu a fost respinsă de HR.","Your holiday request was approved.":"Cererea ta de concediu a fost aprobată.","Your holiday request was rejected.":"Cererea ta de concediu a fost respinsă.","Your supply request was approved.":"Cererea ta de materiale a fost aprobată.","Your supply request was rejected.":"Cererea ta de materiale a fost respinsă."
 };
 
+const RU_EMAIL_COPY: Record<string, string> = {
+  "Copy formatted roster":"Скопировать график с форматированием",
+  "Roster copied. Paste it into the e-mail body.":"График скопирован. Вставьте его в текст письма.",
+  "Roster text copied. Paste it into the e-mail body.":"Текст графика скопирован. Вставьте его в письмо.",
+  "Could not copy roster. Allow clipboard access and try again.":"Не удалось скопировать график. Разрешите доступ к буферу обмена и повторите попытку."
+};
+const RO_EMAIL_COPY: Record<string, string> = {
+  "Copy formatted roster":"Copiază programul formatat",
+  "Roster copied. Paste it into the e-mail body.":"Programul a fost copiat. Lipește-l în corpul e-mailului.",
+  "Roster text copied. Paste it into the e-mail body.":"Textul programului a fost copiat. Lipește-l în e-mail.",
+  "Could not copy roster. Allow clipboard access and try again.":"Programul nu a putut fi copiat. Permite accesul la clipboard și încearcă din nou."
+};
+
 const DICTIONARIES: Partial<Record<Lang, Record<string, string>>> = {
   pt: PT,
-  ru: { ...RU, ...RU_EXTRA, ...RU_EXTRA2, ...RU_EXTRA3, ...RU_EXTRA4, ...RU_EXTRA5, ...RU_EXTRA6, ...RU_EXTRA7, ...RU_EXTRA8, ...RU_EXTRA9, ...RU_EXTRA10, ...RU_EXTRA11, ...RU_EXTRA12, ...RU_DASHBOARD, ...RU_AUTH },
-  ro: { ...RO, ...RO_EXTRA, ...RO_EXTRA2, ...RO_EXTRA3, ...RO_EXTRA4, ...RO_EXTRA5, ...RO_EXTRA6, ...RO_EXTRA7, ...RO_EXTRA8, ...RO_EXTRA9, ...RO_EXTRA10, ...RO_EXTRA11, ...RO_EXTRA12, ...RO_DASHBOARD, ...RO_AUTH },
+  ru: { ...RU, ...RU_EXTRA, ...RU_EXTRA2, ...RU_EXTRA3, ...RU_EXTRA4, ...RU_EXTRA5, ...RU_EXTRA6, ...RU_EXTRA7, ...RU_EXTRA8, ...RU_EXTRA9, ...RU_EXTRA10, ...RU_EXTRA11, ...RU_EXTRA12, ...RU_EMAIL_COPY, ...RU_DASHBOARD, ...RU_AUTH },
+  ro: { ...RO, ...RO_EXTRA, ...RO_EXTRA2, ...RO_EXTRA3, ...RO_EXTRA4, ...RO_EXTRA5, ...RO_EXTRA6, ...RO_EXTRA7, ...RO_EXTRA8, ...RO_EXTRA9, ...RO_EXTRA10, ...RO_EXTRA11, ...RO_EXTRA12, ...RO_EMAIL_COPY, ...RO_DASHBOARD, ...RO_AUTH },
 };
 
 export const makeT = (lang: Lang): TFn => (en, vars) => {

@@ -305,6 +305,7 @@ export function EmailPreviewModal({ onClose, employeeRoleFilter = 'all' }: { onC
   const [mode, setMode] = useState<"employee" | "team">("employee");
   const [selId, setSelId] = useState<string | null>(null);
   const [emailAppOpened, setEmailAppOpened] = useState(false);
+  const [copyStatus, setCopyStatus] = useState<"idle" | "copied" | "text-copied" | "error">("idle");
 
   useEffect(() => {
     const h = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
@@ -357,8 +358,45 @@ export function EmailPreviewModal({ onClose, employeeRoleFilter = 'all' }: { onC
     window.location.href = mailto;
     setEmailAppOpened(true);
   };
+  const copyRoster = async () => {
+    const preview = document.getElementById(mode === "employee" ? "roster-email-html-body" : "roster-team-html-body");
+    if (!preview) { setCopyStatus("error"); return; }
+    const html = preview.innerHTML;
+    const plainText = preview.innerText;
+    try {
+      if (!navigator.clipboard?.write || typeof ClipboardItem === "undefined") throw new Error("Rich clipboard unavailable");
+      await navigator.clipboard.write([new ClipboardItem({
+        "text/html": new Blob([html], { type: "text/html" }),
+        "text/plain": new Blob([plainText], { type: "text/plain" }),
+      })]);
+      setCopyStatus("copied");
+      return;
+    } catch {
+      // Some browsers deny rich clipboard access. Fall back to formatted selection,
+      // then plain text if rich copy is unavailable.
+    }
+    const selection = window.getSelection();
+    const previousRange = selection?.rangeCount ? selection.getRangeAt(0).cloneRange() : null;
+    let richCopied = false;
+    try {
+      const range = document.createRange();
+      range.selectNodeContents(preview);
+      selection?.removeAllRanges();
+      selection?.addRange(range);
+      richCopied = document.execCommand("copy");
+    } catch { /* Use plain text fallback below. */ }
+    selection?.removeAllRanges();
+    if (previousRange) selection?.addRange(previousRange);
+    if (richCopied) { setCopyStatus("copied"); return; }
+    try {
+      await navigator.clipboard.writeText(plainText);
+      setCopyStatus("text-copied");
+    } catch {
+      setCopyStatus("error");
+    }
+  };
   const modeBtn = (m: "employee" | "team", label: string) => (
-    <button onClick={() => { setMode(m); setEmailAppOpened(false); }}
+      <button onClick={() => { setMode(m); setEmailAppOpened(false); setCopyStatus("idle"); }}
       style={{ flex: 1, padding: isMobile ? "9px 8px" : "7px 8px", borderRadius: 7, cursor: "pointer", fontFamily: "inherit", fontSize: 12, fontWeight: 700,
         border: `1.5px solid ${mode === m ? C.gold : C.border}`, background: mode === m ? `${C.gold}18` : "transparent", color: mode === m ? C.gold : C.muted }}>
       {label}
@@ -404,7 +442,7 @@ export function EmailPreviewModal({ onClose, employeeRoleFilter = 'all' }: { onC
                         const over = r.emp.stamp !== null && r.emp.hoursUsed + r.hours > r.emp.hoursLimit;
                         const roleKey = r.emp.role === 'cleaner' ? 'Cleaner' : r.emp.role === 'security' ? 'Security' : 'Supervisor';
                         return (
-                          <button key={r.emp.id} onClick={() => { setSelId(r.emp.id); setEmailAppOpened(false); }}
+                          <button key={r.emp.id} onClick={() => { setSelId(r.emp.id); setEmailAppOpened(false); setCopyStatus("idle"); }}
                             style={{ flexShrink: 0, display: "flex", alignItems: "center", gap: 8, padding: "6px 12px 6px 6px", borderRadius: 99, cursor: "pointer", fontFamily: "inherit",
                               border: `1px solid ${active ? C.gold : C.border}`, background: active ? `${C.gold}18` : "transparent", color: C.text, fontSize: 13, fontWeight: 600 }}>
                             <span style={{ width: 28, height: 28, borderRadius: "50%", background: roleColor(r.emp.role,r.emp.id), color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10, fontWeight: 800 }}>{initials(r.emp.name)}</span>
@@ -422,7 +460,7 @@ export function EmailPreviewModal({ onClose, employeeRoleFilter = 'all' }: { onC
                           const over = r.emp.stamp !== null && r.emp.hoursUsed + r.hours > r.emp.hoursLimit;
                           const roleKey = r.emp.role === 'cleaner' ? 'Cleaner' : r.emp.role === 'security' ? 'Security' : 'Supervisor';
                           return (
-                            <button key={r.emp.id} onClick={() => { setSelId(r.emp.id); setEmailAppOpened(false); }}
+                            <button key={r.emp.id} onClick={() => { setSelId(r.emp.id); setEmailAppOpened(false); setCopyStatus("idle"); }}
                               style={{ width: "100%", display: "flex", alignItems: "center", gap: 10, padding: "8px 10px", marginBottom: 4, borderRadius: 8, cursor: "pointer", fontFamily: "inherit", textAlign: "left",
                                 border: `1px solid ${active ? C.gold : "transparent"}`, background: active ? `${C.gold}18` : "transparent" }}>
                               <div style={{ width: 32, height: 32, borderRadius: "50%", background: roleColor(r.emp.role,r.emp.id), color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: 800, flexShrink: 0 }}>{initials(r.emp.name)}</div>
@@ -455,20 +493,30 @@ export function EmailPreviewModal({ onClose, employeeRoleFilter = 'all' }: { onC
                   </div>
                   {mode === "employee"
                     ? <div id="roster-email-html-body"><EmployeeEmail emp={current.emp} days={current.days} count={current.count} hours={current.hours} sender={user.name} /></div>
-                    : <TeamEmail roster={roster} sender={user.name} employeeRoleFilter={employeeRoleFilter} />}
+                    : <div id="roster-team-html-body"><TeamEmail roster={roster} sender={user.name} employeeRoleFilter={employeeRoleFilter} /></div>}
                 </div>
               </div>
             </div>
 
             {/* footer actions */}
             <div style={{ padding: "12px 16px", borderTop: `1px solid ${C.border}`, display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap", flexShrink: 0 }}>
-              <div role="status" aria-live="polite" style={{ flex: isMobile ? "1 1 100%" : 1, fontSize: 12, color: emailAppOpened ? C.green : C.muted }}>
-                {emailAppOpened
+              <div role="status" aria-live="polite" style={{ flex: isMobile ? "1 1 100%" : 1, fontSize: 12, color: copyStatus === "error" ? C.red : copyStatus !== "idle" || emailAppOpened ? C.green : C.muted }}>
+                {copyStatus === "error"
+                  ? t("Could not copy roster. Allow clipboard access and try again.")
+                  : copyStatus === "copied"
+                    ? t("Roster copied. Paste it into the e-mail body.")
+                    : copyStatus === "text-copied"
+                      ? t("Roster text copied. Paste it into the e-mail body.")
+                      : emailAppOpened
                   ? t("Email draft opened. Press Send in your email app to deliver it.")
                   : mode === "employee"
                     ? t("Review the e-mail, then send.")
                     : t("Select an employee to send a personal roster email.")}
               </div>
+              <button type="button" onClick={()=>void copyRoster()}
+                style={{flex:isMobile?1:undefined,textAlign:"center",background:C.card,color:C.gold,border:`1px solid ${C.gold}`,borderRadius:7,padding:"11px 16px",fontWeight:700,fontSize:13,fontFamily:"inherit",cursor:"pointer"}}>
+                {t("Copy formatted roster")}
+              </button>
               {mode === "employee" && (
                 <button type="button" onClick={openEmailApp} disabled={emailAppOpened}
                   style={{ flex: isMobile ? 1 : undefined, textAlign: "center", background: emailAppOpened ? C.green : C.gold, color: "#fff", border: `1px solid ${emailAppOpened ? C.green : C.gold}`, borderRadius: 7, padding: "11px 16px", fontWeight: 700, fontSize: 13, fontFamily: "inherit", cursor: emailAppOpened ? "default" : "pointer" }}>
