@@ -70,7 +70,9 @@ function WeekCalendarTable({ days, teamMode = false, roster }: { days: Day[]; te
   const entriesOf = (item: Day): Entry[] =>
     teamMode && roster
       ? Object.entries(roster[fmt(item.date)] ?? {}).flatMap(([siteId, slots]) =>
-          slots.map(sl => ({ siteId, start: sl.start, end: sl.end, empId: sl.empId })))
+          item.shifts.some(shift => shift.siteId === siteId)
+            ? slots.map(sl => ({ siteId, start: sl.start, end: sl.end, empId: sl.empId }))
+            : [])
       : item.shifts.map(s => ({ siteId: s.siteId, start: s.start, end: s.end }));
 
   const weekHeader = (wi: number, week: Day[]) => {
@@ -84,6 +86,54 @@ function WeekCalendarTable({ days, teamMode = false, roster }: { days: Day[]; te
       </div>
     );
   };
+
+  if (teamMode) {
+    return (
+      <div style={{ display: "flex", flexDirection: "column", gap: 14, fontFamily: EMAIL_FONT }}>
+        {weeks.map((week, wi) => (
+          <div key={wi} style={{ border: "1px solid #dfe3e8", borderRadius: 9, overflow: "hidden", background: "#fff" }}>
+            {weekHeader(wi, week)}
+            <table role="presentation" style={{ width: "100%", borderCollapse: "collapse", tableLayout: "fixed", fontFamily: EMAIL_FONT }}>
+              <tbody>
+                {week.map(item => {
+                  const entries = entriesOf(item);
+                  const weekend = isWeekend(item.date);
+                  return (
+                    <tr key={fmt(item.date)}>
+                      <td width="82" valign="top" style={{ width: 82, padding: "10px 8px", verticalAlign: "top", borderBottom: "1px solid #e5e7eb", background: weekend ? "#fff5e6" : "#f8fafc" }}>
+                        <div style={{ fontSize: 9, fontWeight: 800, color: weekend ? "#b45309" : "#6b7280", textTransform: "uppercase" }}>{DOW[lang][item.date.getDay()]}</div>
+                        <div style={{ fontSize: 16, fontWeight: 800, color: weekend ? "#b45309" : "#111827", marginTop: 2 }}>{item.date.getDate()} {MONTHS[lang][item.date.getMonth()]}</div>
+                      </td>
+                      <td valign="top" style={{ padding: "5px 8px", verticalAlign: "top", borderBottom: "1px solid #e5e7eb" }}>
+                        {entries.length === 0 ? (
+                          <div style={{ padding: "7px 4px", color: "#9ca3af", fontSize: 11, fontStyle: "italic" }}>{t("Day off")}</div>
+                        ) : entries.map((entry, index) => {
+                          const emp = entry.empId ? employees.find(e => e.id === entry.empId) : undefined;
+                          const color = emp ? roleColor(emp.role, emp.id) : "#64748b";
+                          const roleKey = emp?.role === "cleaner" ? "Cleaner" : emp?.role === "security" ? "Security" : "Supervisor";
+                          return (
+                            <table key={`${fmt(item.date)}-${entry.siteId}-${entry.start}-${index}`} role="presentation" style={{ width: "100%", borderCollapse: "collapse", tableLayout: "fixed", margin: "3px 0" }}>
+                              <tbody><tr>
+                                <td valign="middle" style={{ padding: "7px 9px", borderTop: `1px solid ${color}35`, borderBottom: `1px solid ${color}35`, borderLeft: `4px solid ${color}`, background: `${color}0D`, verticalAlign: "middle" }}>
+                                  <span style={{ fontSize: 12, fontWeight: 700, color: "#1f2937", overflowWrap: "anywhere" }}>{emp?.name ?? siteName(entry.siteId)}</span>
+                                  {emp && <span style={{ display: "inline-block", marginLeft: 7, padding: "2px 6px", borderRadius: 99, border: `1px solid ${color}45`, background: `${color}12`, color, fontSize: 9, fontWeight: 700 }}>{t(roleKey)}</span>}
+                                </td>
+                                <td width="112" align="right" valign="middle" style={{ width: 112, padding: "7px 8px", borderTop: `1px solid ${color}35`, borderBottom: `1px solid ${color}35`, borderRight: `1px solid ${color}35`, background: `${color}0D`, color: "#1f2937", fontSize: 11, fontWeight: 800, whiteSpace: "nowrap", verticalAlign: "middle" }}>{entry.start}–{entry.end}</td>
+                              </tr></tbody>
+                            </table>
+                          );
+                        })}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        ))}
+      </div>
+    );
+  }
 
   /* Celular: uma linha por dia (as 7 colunas ficariam apertadas demais) */
   if (isMobile) {
