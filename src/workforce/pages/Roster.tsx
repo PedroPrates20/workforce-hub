@@ -161,7 +161,7 @@ export function Roster() {
         <div style={{fontSize:11,color:C.muted,marginLeft:"auto",textAlign:"right"}}>{t("Drop employee on a day · Maximum 7 shifts per day")}</div>
       </div>
 
-      <section aria-labelledby="available-roster-employees" style={{padding:14,marginBottom:18,background:C.card,border:`1px solid ${C.border}`,borderRadius:10}}>
+      <section aria-labelledby="available-roster-employees" style={{position:isMobile?'static':'sticky',top:isMobile?undefined:10,zIndex:30,padding:14,marginBottom:18,background:C.card,border:`1px solid ${C.border}`,borderRadius:10,boxShadow:isMobile?undefined:'0 6px 18px rgba(27,38,56,.10)'}}>
         <div style={{display:'flex',alignItems:'flex-start',justifyContent:'space-between',gap:12,flexWrap:'wrap',marginBottom:10}}>
           <div>
             <h2 id="available-roster-employees" style={{margin:0,fontSize:14,fontWeight:800,color:C.text}}>{t('Available employees')} <span style={{fontSize:11,fontWeight:600,color:C.muted}}>({filteredEmployees.length})</span></h2>
