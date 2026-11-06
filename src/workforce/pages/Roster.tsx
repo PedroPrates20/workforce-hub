@@ -222,15 +222,16 @@ export function Roster() {
                           const ps=getShiftPreset(sl.start)!;
                           const employeeColor=emp?roleColor(emp.role,emp.id):ps.color;
                           return emp ? (
-                            <div key={sl.empId} style={{display:"flex",alignItems:"center",gap:8,border:`1px solid ${employeeColor}45`,borderLeft:`4px solid ${employeeColor}`,borderRadius:8,background:ps.bg+"16",padding:"6px 8px"}}>
-                              <div style={{width:26,height:26,borderRadius:"50%",background:employeeColor,color:"#fff",display:"flex",alignItems:"center",justifyContent:"center",fontSize:10,fontWeight:800,flexShrink:0}}>{initials(emp.name)}</div>
-                              <div style={{flex:1,minWidth:0}}>
-                                <div style={{fontSize:15,fontWeight:800,color:C.text,whiteSpace:'normal',overflowWrap:'anywhere',lineHeight:1.2}}>{emp.name}</div>
-                                <div style={{marginTop:4}}><Badge label={t(emp.role==='cleaner'?'Cleaner':emp.role==='security'?'Security':'Supervisor')} color={employeeColor}/></div>
-                                <div style={{fontSize:14,fontWeight:800,color:ps.color,marginTop:3}}>{sl.start}–{sl.end}</div>
+                            <div key={sl.empId} style={{display:"flex",flexDirection:"column",gap:7,border:`1px solid ${employeeColor}45`,borderLeft:`4px solid ${employeeColor}`,borderRadius:8,background:ps.bg+"16",padding:"8px 10px"}}>
+                              <div style={{display:'flex',alignItems:'flex-start',gap:8}}>
+                                <div style={{flex:1,minWidth:0,fontSize:15,fontWeight:800,color:C.text,whiteSpace:'normal',overflowWrap:'anywhere',lineHeight:1.25}}>{emp.name}</div>
+                                <button onClick={()=>removeSlot(dk,activeSite,sl.empId)} aria-label={t("Remove {name}",{name:emp.name})} title={t("Remove shift")}
+                                  style={{width:30,height:30,background:"none",border:`1px solid ${C.border}`,borderRadius:8,cursor:"pointer",color:C.muted,fontSize:17,lineHeight:1,fontFamily:"inherit",flexShrink:0}}>×</button>
                               </div>
-                              <button onClick={()=>removeSlot(dk,activeSite,sl.empId)} aria-label={t("Remove {name}",{name:emp.name})} title={t("Remove shift")}
-                                style={{width:34,height:34,background:"none",border:`1px solid ${C.border}`,borderRadius:8,cursor:"pointer",color:C.muted,fontSize:18,lineHeight:1,fontFamily:"inherit",flexShrink:0}}>×</button>
+                              <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',gap:8,flexWrap:'wrap'}}>
+                                <Badge label={t(emp.role==='cleaner'?'Cleaner':emp.role==='security'?'Security':'Supervisor')} color={employeeColor}/>
+                                <div style={{fontSize:14,fontWeight:800,color:ps.color}}>{sl.start}–{sl.end}</div>
+                              </div>
                             </div>
                           ) : null;
                         })}
