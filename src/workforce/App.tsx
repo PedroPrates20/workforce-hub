@@ -18,6 +18,7 @@ import { Ponto } from './pages/Ponto';
 import { Reports } from './pages/Reports';
 import { Audit } from './pages/Audit';
 import { getSharedDirectory } from './directoryDb';
+import { getCurrentAccount, logoutAccount } from './authServer.server';
 
 const TAB_COMPONENTS: Record<Tab, () => React.ReactElement> = {
   dashboard: Dashboard,
@@ -60,6 +61,7 @@ const fictionalizeSites = (stored: Site[]) => stored.map((site, index) => {
 
 export default function WorkforceApp() {
   const [user, setUser] = useState<User | null>(null);
+  const [authLoaded, setAuthLoaded] = useState(DEMO_MODE);
   const [lang, setLangState] = useState<Lang>("en");
   // Lê o idioma salvo só depois da montagem (evita diferença entre servidor e navegador).
   useEffect(() => {
@@ -84,15 +86,21 @@ export default function WorkforceApp() {
   const [employees, setEmployees] = useState<Employee[]>(MOCK_EMPLOYEES);
   const [employeesLoaded, setEmployeesLoaded] = useState(false);
 
+  useEffect(() => {
+    if (DEMO_MODE) return;
+    void getCurrentAccount().then(account => setUser(account)).catch(() => setUser(null)).finally(() => setAuthLoaded(true));
+  }, []);
+
   // Prefer the shared Cloudflare D1 demo directory when the Worker binding exists.
   // The browser-local demo remains available for local previews without Cloudflare.
   useEffect(() => {
+    if (!DEMO_MODE && !user) return;
     void getSharedDirectory().then(directory => {
       if (!directory.configured) return;
       setEmployees(directory.employees);
       setSites(directory.sites);
     }).catch(error => console.error('Could not load the shared demo directory.', error));
-  }, []);
+  }, [user]);
 
   useEffect(() => {
     if(!DEMO_MODE){setSupplyRequestsLoaded(true);return;}
@@ -171,7 +179,12 @@ export default function WorkforceApp() {
   }, [employees, employeesLoaded]);
 
   useEffect(() => {
-    setUser(current => current ? employees.find(employee => employee.id === current.id) ?? null : null);
+    setUser(current => {
+      if (!current) return null;
+      const matchingEmployee = employees.find(employee => employee.id === current.id);
+      if (matchingEmployee) return matchingEmployee;
+      return DEMO_MODE ? null : current;
+    });
   }, [employees]);
 
   useEffect(() => {
@@ -193,6 +206,10 @@ export default function WorkforceApp() {
     try { localStorage.setItem('epm_sites', JSON.stringify(sites)); } catch { /* ignore storage failures */ }
   }, [sites, sitesLoaded]);
 
+  if (!DEMO_MODE && !authLoaded) {
+    return <div style={{minHeight:'100vh',display:'grid',placeItems:'center',background:C.bg,color:C.muted,fontSize:13}}>{'Loading...'}</div>;
+  }
+
   if (!user) {
     return <Login employees={employees} onLogin={u => { setUser(u); setTab("dashboard"); }} lang={lang} setLang={setLang} />;
   }
@@ -204,7 +221,10 @@ export default function WorkforceApp() {
   return (
     <Ctx.Provider value={{ user, lang, tab:safeTab, setTab, roster, setRoster, swaps, setSwaps, supplyRequests, setSupplyRequests, holidayRequests, setHolidayRequests, holidayBlocks, setHolidayBlocks, sites, setSites, employees, setEmployees }}>
       <div style={{ display: "flex", minHeight: "100vh", background: C.bg, fontFamily:"inherit", color: C.text }}>
-        <Sidebar lang={lang} setLang={setLang} onLogout={() => setUser(null)} />
+        <Sidebar lang={lang} setLang={setLang} onLogout={() => {
+          if (DEMO_MODE) { setUser(null); return; }
+          void logoutAccount().catch(() => undefined).finally(() => setUser(null));
+        }} />
         <main className="pt-14 md:pt-0" style={{ flex: 1, minWidth: 0 }}>
           <TabComponent />
         </main>
@@ -212,3 +232,4 @@ export default function WorkforceApp() {
     </Ctx.Provider>
   );
 }
+

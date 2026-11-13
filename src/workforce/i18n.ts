@@ -39,6 +39,30 @@ const PT: Record<string, string> = {
   "Open duplicate supply request warning": "Já existe um pedido pendente deste material para este local nos últimos 3 dias. Verifique com o seu supervisor antes de pedir novamente.",
   "No site assigned to your account": "Nenhum local está associado à sua conta",
   "Email draft opened. Press Send in your email app to deliver it.": "Rascunho de e-mail aberto. Pressione Enviar no seu aplicativo de e-mail para concluir o envio.",
+  "Sign in to Workforce Hub": "Entrar no Workforce Hub",
+  "Sign in with your registered personal e-mail and six-digit PIN.": "Entre com seu e-mail pessoal cadastrado e a senha numérica de seis dígitos.",
+  "Personal e-mail": "E-mail pessoal",
+  "6-digit PIN": "Senha numérica (6 dígitos)",
+  "Contact HR or an administrator to set or reset your PIN.": "Peça ao RH ou administrador para cadastrar ou redefinir sua senha.",
+  "Enter a six-digit PIN.": "Digite uma senha com seis dígitos.",
+  "Login setup is incomplete. Ask an administrator to configure access.": "A configuração do acesso não foi concluída. Peça ao administrador para configurar o login.",
+  "The e-mail or PIN is incorrect, or the account is locked.": "O e-mail ou a senha está incorreto, ou a conta está bloqueada.",
+  "Login could not be completed. Try again.": "Não foi possível entrar. Tente novamente.",
+  "Signing in…": "Entrando…",
+  "Sign in": "Entrar",
+  "Set or reset login PIN": "Cadastrar ou redefinir senha de acesso",
+  "New 6-digit PIN": "Nova senha numérica (6 dígitos)",
+  "Confirm 6-digit PIN": "Confirme a senha numérica",
+  "Use six different-looking digits. Sequential and repeated digits are not accepted.": "Use seis dígitos variados. Sequências e dígitos repetidos não são aceitos.",
+  "The PIN entries do not match.": "As senhas não correspondem.",
+  "This e-mail is already assigned to another account.": "Este e-mail já está associado a outra conta.",
+  "PIN must be six digits and cannot be sequential or all the same.": "A senha deve ter seis dígitos e não pode ser sequencial nem ter todos os dígitos iguais.",
+  "PIN saved. Share it with the employee privately.": "Senha cadastrada. Compartilhe-a com o funcionário de forma privada.",
+  "Only HR or an administrator can manage employee PINs.": "Somente o RH ou um administrador pode gerenciar as senhas dos funcionários.",
+  "Employee account could not be found. Check that the employee is active and has a registered e-mail.": "A conta do funcionário não foi encontrada. Verifique se está ativo e tem um e-mail cadastrado.",
+  "Could not save the PIN. Check that the database migration is applied and try again.": "Não foi possível salvar a senha. Verifique se a atualização do banco foi aplicada e tente novamente.",
+  "Save PIN": "Salvar senha",
+  "Loading...": "Carregando...",
   "Copy formatted roster": "Copiar escala formatada",
   "Roster copied. Paste it into the e-mail body.": "Escala copiada. Cole no corpo do e-mail.",
   "Roster text copied. Paste it into the e-mail body.": "Texto da escala copiado. Cole no corpo do e-mail.",
@@ -694,11 +718,17 @@ const RO_EMAIL_COPY: Record<string, string> = {
   "Roster text copied. Paste it into the e-mail body.":"Textul programului a fost copiat. Lipește-l în e-mail.",
   "Could not copy roster. Allow clipboard access and try again.":"Programul nu a putut fi copiat. Permite accesul la clipboard și încearcă din nou."
 };
+const RU_LOGIN_AUTH: Record<string, string> = {
+  "Sign in to Workforce Hub":"Войти в Workforce Hub","Sign in with your registered personal e-mail and six-digit PIN.":"Войдите с зарегистрированным личным адресом электронной почты и шестизначным PIN-кодом.","Personal e-mail":"Личная электронная почта","6-digit PIN":"PIN-код из 6 цифр","Contact HR or an administrator to set or reset your PIN.":"Обратитесь в отдел кадров или к администратору, чтобы задать или сбросить PIN-код.","Enter a six-digit PIN.":"Введите PIN-код из шести цифр.","Login setup is incomplete. Ask an administrator to configure access.":"Настройка входа не завершена. Попросите администратора настроить доступ.","The e-mail or PIN is incorrect, or the account is locked.":"Неверный адрес электронной почты или PIN-код, либо учётная запись заблокирована.","Login could not be completed. Try again.":"Не удалось войти. Попробуйте ещё раз.","Signing in…":"Выполняется вход…","Sign in":"Войти","Set or reset login PIN":"Задать или сбросить PIN-код","New 6-digit PIN":"Новый PIN-код из 6 цифр","Confirm 6-digit PIN":"Подтвердите PIN-код","Use six different-looking digits. Sequential and repeated digits are not accepted.":"Используйте разные цифры. Последовательные и повторяющиеся цифры не допускаются.","The PIN entries do not match.":"PIN-коды не совпадают.","This e-mail is already assigned to another account.":"Этот адрес электронной почты уже связан с другой учётной записью.","PIN must be six digits and cannot be sequential or all the same.":"PIN-код должен состоять из шести цифр, не быть последовательным или одинаковым.","PIN saved. Share it with the employee privately.":"PIN-код сохранён. Передайте его сотруднику лично.","Only HR or an administrator can manage employee PINs.":"Управлять PIN-кодами сотрудников могут только отдел кадров или администратор.","Employee account could not be found. Check that the employee is active and has a registered e-mail.":"Учётная запись сотрудника не найдена. Проверьте, активен ли сотрудник и указан ли его адрес электронной почты.","Could not save the PIN. Check that the database migration is applied and try again.":"Не удалось сохранить PIN-код. Проверьте, применено ли обновление базы данных, и повторите попытку.","Save PIN":"Сохранить PIN-код","Loading...":"Загрузка..."
+};
+const RO_LOGIN_AUTH: Record<string, string> = {
+  "Sign in to Workforce Hub":"Autentificare în Workforce Hub","Sign in with your registered personal e-mail and six-digit PIN.":"Autentifică-te cu adresa personală de e-mail înregistrată și PIN-ul din șase cifre.","Personal e-mail":"E-mail personal","6-digit PIN":"PIN din 6 cifre","Contact HR or an administrator to set or reset your PIN.":"Contactează HR sau un administrator pentru a seta sau reseta PIN-ul.","Enter a six-digit PIN.":"Introdu un PIN din șase cifre.","Login setup is incomplete. Ask an administrator to configure access.":"Configurarea autentificării nu este completă. Cere unui administrator să configureze accesul.","The e-mail or PIN is incorrect, or the account is locked.":"E-mailul sau PIN-ul este incorect ori contul este blocat.","Login could not be completed. Try again.":"Autentificarea nu a reușit. Încearcă din nou.","Signing in…":"Se autentifică…","Sign in":"Autentificare","Set or reset login PIN":"Setează sau resetează PIN-ul","New 6-digit PIN":"PIN nou din 6 cifre","Confirm 6-digit PIN":"Confirmă PIN-ul din 6 cifre","Use six different-looking digits. Sequential and repeated digits are not accepted.":"Folosește șase cifre diferite. Secvențele și cifrele repetate nu sunt acceptate.","The PIN entries do not match.":"PIN-urile nu coincid.","This e-mail is already assigned to another account.":"Această adresă de e-mail este deja asociată altui cont.","PIN must be six digits and cannot be sequential or all the same.":"PIN-ul trebuie să aibă șase cifre și nu poate fi secvențial sau format din aceeași cifră.","PIN saved. Share it with the employee privately.":"PIN-ul a fost salvat. Comunică-l angajatului în mod privat.","Only HR or an administrator can manage employee PINs.":"Numai HR sau un administrator poate gestiona PIN-urile angajaților.","Employee account could not be found. Check that the employee is active and has a registered e-mail.":"Contul angajatului nu a fost găsit. Verifică dacă este activ și are un e-mail înregistrat.","Could not save the PIN. Check that the database migration is applied and try again.":"PIN-ul nu a putut fi salvat. Verifică dacă migrarea bazei de date a fost aplicată și încearcă din nou.","Save PIN":"Salvează PIN-ul","Loading...":"Se încarcă..."
+};
 
 const DICTIONARIES: Partial<Record<Lang, Record<string, string>>> = {
   pt: PT,
-  ru: { ...RU, ...RU_EXTRA, ...RU_EXTRA2, ...RU_EXTRA3, ...RU_EXTRA4, ...RU_EXTRA5, ...RU_EXTRA6, ...RU_EXTRA7, ...RU_EXTRA8, ...RU_EXTRA9, ...RU_EXTRA10, ...RU_EXTRA11, ...RU_EXTRA12, ...RU_EMAIL_COPY, ...RU_DASHBOARD, ...RU_AUTH },
-  ro: { ...RO, ...RO_EXTRA, ...RO_EXTRA2, ...RO_EXTRA3, ...RO_EXTRA4, ...RO_EXTRA5, ...RO_EXTRA6, ...RO_EXTRA7, ...RO_EXTRA8, ...RO_EXTRA9, ...RO_EXTRA10, ...RO_EXTRA11, ...RO_EXTRA12, ...RO_EMAIL_COPY, ...RO_DASHBOARD, ...RO_AUTH },
+  ru: { ...RU, ...RU_EXTRA, ...RU_EXTRA2, ...RU_EXTRA3, ...RU_EXTRA4, ...RU_EXTRA5, ...RU_EXTRA6, ...RU_EXTRA7, ...RU_EXTRA8, ...RU_EXTRA9, ...RU_EXTRA10, ...RU_EXTRA11, ...RU_EXTRA12, ...RU_EMAIL_COPY, ...RU_LOGIN_AUTH, ...RU_DASHBOARD, ...RU_AUTH },
+  ro: { ...RO, ...RO_EXTRA, ...RO_EXTRA2, ...RO_EXTRA3, ...RO_EXTRA4, ...RO_EXTRA5, ...RO_EXTRA6, ...RO_EXTRA7, ...RO_EXTRA8, ...RO_EXTRA9, ...RO_EXTRA10, ...RO_EXTRA11, ...RO_EXTRA12, ...RO_EMAIL_COPY, ...RO_LOGIN_AUTH, ...RO_DASHBOARD, ...RO_AUTH },
 };
 
 export const makeT = (lang: Lang): TFn => (en, vars) => {

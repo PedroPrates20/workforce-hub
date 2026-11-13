@@ -1,11 +1,19 @@
+import { useState, type FormEvent } from 'react';
+import { useServerFn } from '@tanstack/react-start';
 import type { User, Lang, Employee } from '../types';
 import { makeT } from '../i18n';
 import { C, DEMO_MODE, PROFILES, roleColor } from '../constants';
+import { loginWithPin } from '../authServer.server';
 import { BrandLogo } from '../components/BrandLogo';
 
 export function Login({employees,onLogin,lang,setLang}:{employees:Employee[]; onLogin:(u:User)=>void; lang:Lang; setLang:(l:Lang)=>void}) {
   const t=makeT(lang);
   const demoMode = DEMO_MODE;
+  const login = useServerFn(loginWithPin);
+  const [email,setEmail]=useState('');
+  const [pin,setPin]=useState('');
+  const [loginError,setLoginError]=useState('');
+  const [submitting,setSubmitting]=useState(false);
   const demoAdmin:User={id:'demo-admin',name:'Demo Administrator',role:'admin',title:PROFILES.admin.title,email:'administrator@example.com',stamp:null,hoursUsed:0,hoursLimit:0,holidayBalance:0,holidayEntitlement:0,site:employees.find(employee=>employee.active)?.site??''};
   const demoAccounts:User[]=[
     ...employees.filter(employee=>['e2','e6','e1','e5','e9'].includes(employee.id)),
@@ -18,6 +26,19 @@ export function Login({employees,onLogin,lang,setLang}:{employees:Employee[]; on
     {label:'Director',role:'director'},
     {label:'Administrator',role:'admin'},
   ];
+  const submitLogin=async(event:FormEvent<HTMLFormElement>)=>{
+    event.preventDefault();
+    setLoginError('');
+    if(!/^\d{6}$/.test(pin)){setLoginError(t('Enter a six-digit PIN.'));return;}
+    setSubmitting(true);
+    try{
+      const result=await login({data:{email:email.trim(),pin}});
+      if(result.ok){onLogin(result.user);return;}
+      setLoginError(result.reason==='not_configured'?t('Login setup is incomplete. Ask an administrator to configure access.'):t('The e-mail or PIN is incorrect, or the account is locked.'));
+    }catch{
+      setLoginError(t('Login could not be completed. Try again.'));
+    }finally{setSubmitting(false);}
+  };
 
   return (
     <div style={{minHeight:"100vh",background:C.bg,display:"flex",alignItems:"center",justifyContent:"center",padding:16,boxSizing:"border-box",fontFamily:"inherit"}}>
@@ -35,10 +56,21 @@ export function Login({employees,onLogin,lang,setLang}:{employees:Employee[]; on
           </div>
         </div>
         <div style={{padding:"clamp(18px,5vw,32px)"}}>
-          <div style={{fontSize:22,fontWeight:800,color:C.text,marginBottom:8}}>{demoMode?t("Development preview"):t("Secure sign-in unavailable")}</div>
-          <div role="status" style={{fontSize:13,color:C.muted,lineHeight:1.55,marginBottom:demoMode?16:0}}>
-            {demoMode?t("Public demo uses fictional data. Changes are saved only in this browser. Do not enter real employee information."):t("Server-side authentication has not been configured. Employee data and app features are disabled until a secure identity provider is connected.")}
+          <div style={{fontSize:22,fontWeight:800,color:C.text,marginBottom:8}}>{demoMode?t("Development preview"):t("Sign in to Workforce Hub")}</div>
+          <div role="status" style={{fontSize:13,color:C.muted,lineHeight:1.55,marginBottom:demoMode?16:18}}>
+            {demoMode?t("Public demo uses fictional data. Changes are saved only in this browser. Do not enter real employee information."):t("Sign in with your registered personal e-mail and six-digit PIN.")}
           </div>
+          {!demoMode&&<form onSubmit={submitLogin} style={{display:'flex',flexDirection:'column',gap:12}}>
+            <label style={{fontSize:12,fontWeight:700,color:C.muted}}>{t('Personal e-mail')}
+              <input type="email" autoComplete="username" required maxLength={254} value={email} onChange={event=>setEmail(event.target.value)} style={{width:'100%',height:42,boxSizing:'border-box',padding:'0 11px',marginTop:5,border:`1px solid ${C.border}`,borderRadius:8,color:C.text,background:C.card,fontSize:14,fontFamily:'inherit'}} />
+            </label>
+            <label style={{fontSize:12,fontWeight:700,color:C.muted}}>{t('6-digit PIN')}
+              <input type="password" inputMode="numeric" autoComplete="current-password" required minLength={6} maxLength={6} pattern="[0-9]{6}" value={pin} onChange={event=>setPin(event.target.value.replace(/\D/g,'').slice(0,6))} style={{width:'100%',height:42,boxSizing:'border-box',padding:'0 11px',marginTop:5,border:`1px solid ${C.border}`,borderRadius:8,color:C.text,background:C.card,fontSize:18,letterSpacing:5,fontFamily:'inherit'}} />
+            </label>
+            <div style={{fontSize:11,color:C.muted,lineHeight:1.45}}>{t('Contact HR or an administrator to set or reset your PIN.')}</div>
+            {loginError&&<div role="alert" style={{fontSize:12,color:C.red,lineHeight:1.45}}>{loginError}</div>}
+            <button type="submit" disabled={submitting} style={{height:42,border:0,borderRadius:8,background:submitting?C.muted:C.gold,color:'#fff',fontWeight:800,fontSize:13,cursor:submitting?'wait':'pointer',fontFamily:'inherit'}}>{t(submitting?'Signing in…':'Sign in')}</button>
+          </form>}
           {demoMode&&<>
             <div style={{fontSize:11,color:C.muted,marginBottom:8,fontWeight:800}}>{t("ACCESS HIERARCHY")}</div>
             <div aria-label={t("Access levels")} style={{display:'flex',flexWrap:'wrap',alignItems:'center',gap:5,marginBottom:16}}>
@@ -64,3 +96,4 @@ export function Login({employees,onLogin,lang,setLang}:{employees:Employee[]; on
     </div>
   );
 }
+

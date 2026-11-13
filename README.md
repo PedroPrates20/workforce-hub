@@ -25,7 +25,7 @@ The project is intended as a **demonstration prototype**. It illustrates user fl
 - **HR staff** can review employee information and requests.
 - **Directors** can see broader operational summaries and approval workflows.
 
-The prototype includes different demonstration profiles to show these views. They do not provide production-grade identity verification or access control.
+Development preview builds include demonstration profiles. Production mode uses a D1-backed sign-in with an employee's registered e-mail and a six-digit numeric PIN. HR or an administrator provisions and resets employee PINs.
 
 ## Run the project locally
 
@@ -74,6 +74,18 @@ This project is connected to a Cloudflare D1 database in the EU, already populat
 
 When the Worker has the `DB` binding, the app loads its employee and site directory from D1. Without a binding, demo-mode local and preview builds use the bundled fictional records. The D1 directory currently provides shared reads; application edits and workflow requests still use the prototype's browser storage and are not yet synchronized to D1. This demo uses fictional `example.com` emails and must not be used for real employee information.
 
+## Production sign-in setup
+
+Production sign-in requires the Cloudflare D1 binding and the authentication migration. After deploying the code, run `npm run db:migrate:remote` to create the account and session tables. In **Workers & Pages → workforce-hub → Settings → Variables and Secrets**, configure:
+
+- `AUTH_ADMIN_EMAIL`: the initial administrator's e-mail address.
+- `AUTH_ADMIN_PIN`: a secret containing a six-digit PIN that is not sequential or all the same digit.
+- Optional `AUTH_ADMIN_NAME`: the administrator's display name.
+
+The first successful sign-in creates the administrator account. Keep `AUTH_ADMIN_EMAIL` configured. Once the administrator account exists, the bootstrap PIN secret can be removed. The administrator or HR can then expand an employee in **Team Status** and choose **Set or reset login PIN**. The employee must be active and have a unique registered e-mail address in D1. The e-mail shown in Team Status is saved to D1 when the PIN is provisioned.
+
+PINs are stored as salted PBKDF2 hashes, sessions use a secure HttpOnly cookie, and five failed attempts temporarily lock an account. This login is a prototype foundation: other workforce workflows still use browser-side state and need server-side authorization and persistence before the app is suitable for sensitive production records.
+
 ## Technology
 
 - React and TypeScript
@@ -94,11 +106,11 @@ src/lib/             Shared utilities
 
 ## Important prototype limitations
 
-The current demonstration uses browser-local data and development profiles. Data saved in one browser is not a central company record and may not be available on another device. Roster emails are sent only after Resend is configured, and the service restricts recipients to the configured email domains.
+The current demonstration uses browser-local data and development profiles. Data saved in one browser is not a central company record and may not be available on another device. The production login protects access to the D1 directory and PIN management, but does not yet authorize and persist every workforce workflow on the server. Roster emails are sent only after Resend is configured, and the service restricts recipients to the configured email domains.
 
 Before handling real employee information or operating this system in a business environment, the project needs, at minimum:
 
-1. Server-side authentication and authorization for every role and operation.
+1. Server-side authorization for every role and operation, beyond the sign-in, directory, and PIN-management endpoints.
 2. A protected, persistent database with backups and appropriate retention rules.
 3. A configured email service with delivery tracking for request and approval notices.
 4. Server-side validation and audit logs for changes to schedules, employee records, and requests.

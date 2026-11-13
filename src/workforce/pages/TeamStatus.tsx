@@ -1,10 +1,13 @@
-import { useState } from 'react';
+import { useState, type FormEvent } from 'react';
+import { useServerFn } from '@tanstack/react-start';
 import { UserPlus } from 'lucide-react';
 import type { Employee, EmployeeRole } from '../types';
 import { Card } from '../components/Card';
 import { Badge } from '../components/Badge';
 import { C, PROFILES, initials, roleColor } from '../constants';
 import { useApp, useI18n } from '../context/AppContext';
+import { setEmployeeLoginPin } from '../authServer.server';
+import { isValidWorkforcePin } from '../authPolicy';
 
 type Filter = 'all' | EmployeeRole;
 type Confirmation = { type:'save'|'add'|'delete'; employeeId:string } | null;
@@ -21,13 +24,20 @@ const inputStyle:React.CSSProperties={width:'100%',background:C.card,border:`1px
 
 export function TeamStatus() {
   const {t}=useI18n();
-  const {employees,setEmployees,sites,setRoster,setSwaps}=useApp();
+  const {employees,setEmployees,sites,setRoster,setSwaps,user}=useApp();
+  const saveEmployeePin=useServerFn(setEmployeeLoginPin);
   const [filter,setFilter]=useState<Filter>('all');
   const [expanded,setExpanded]=useState<string|null>(null);
   const [draft,setDraft]=useState<Employee|null>(null);
   const [isNewDraft,setIsNewDraft]=useState(false);
   const [confirmation,setConfirmation]=useState<Confirmation>(null);
   const [formError,setFormError]=useState('');
+  const [pinEmployee,setPinEmployee]=useState<Employee|null>(null);
+  const [pin,setPin]=useState('');
+  const [pinConfirmation,setPinConfirmation]=useState('');
+  const [pinMessage,setPinMessage]=useState('');
+  const [pinSaved,setPinSaved]=useState(false);
+  const [pinSaving,setPinSaving]=useState(false);
   const emps=filter==='all'?employees:employees.filter(employee=>employee.role===filter);
 
   const updateDraft=<K extends keyof Employee>(key:K,value:Employee[K])=>setDraft(current=>current?{...current,[key]:value}:current);
@@ -59,6 +69,23 @@ export function TeamStatus() {
       setDraft(null);
     }
     setConfirmation(null);setFormError('');
+  };
+  const submitEmployeePin=async(event:FormEvent<HTMLFormElement>)=>{
+    event.preventDefault();setPinMessage('');setPinSaved(false);
+    if(!isValidWorkforcePin(pin)){setPinMessage(t('PIN must be six digits and cannot be sequential or all the same.'));return;}
+    if(pin!==pinConfirmation){setPinMessage(t('The PIN entries do not match.'));return;}
+    if(!pinEmployee)return;
+    setPinSaving(true);
+    try{
+      const result=await saveEmployeePin({data:{employeeId:pinEmployee.id,email:pinEmployee.email,pin}});
+      if(result.ok){setPinMessage(t('PIN saved. Share it with the employee privately.'));setPinSaved(true);setPin('');setPinConfirmation('');}
+      else if(result.reason==='not_authorized')setPinMessage(t('Only HR or an administrator can manage employee PINs.'));
+      else if(result.reason==='invalid_pin')setPinMessage(t('PIN must be six digits and cannot be sequential or all the same.'));
+      else if(result.reason==='email_in_use')setPinMessage(t('This e-mail is already assigned to another account.'));
+      else if(result.reason==='employee_not_found')setPinMessage(t('Employee account could not be found. Check that the employee is active and has a registered e-mail.'));
+      else setPinMessage(t('Could not save the PIN. Check that the database migration is applied and try again.'));
+    }catch{setPinMessage(t('Could not save the PIN. Check that the database migration is applied and try again.'));}
+    finally{setPinSaving(false);}
   };
 
   const field=(label:string,value:string|number,onChange:(value:string)=>void,type='text')=>(
@@ -111,6 +138,7 @@ export function TeamStatus() {
               {infoBlock('Holidays and hours', [['Holiday balance',`${employee.holidayBalance}/${entitlement} ${t('days')}`],['Days used',`${daysUsed} ${t('days')}`],['Annual holiday allowance',`${entitlement} ${t('days')}`]])}
               {infoBlock('Compliance and documents', [['Work permission',employee.stamp||t('Not provided')],['Hours used',`${employee.hoursUsed} h`],['Hours limit',`${employee.hoursLimit} h`],['Visa expiry',employee.visaExpiry],['Certificate expiry',employee.certExpiry]])}
               <div style={{gridColumn:'1 / -1',display:'flex',gap:8,justifyContent:'flex-end',flexWrap:'wrap'}}>
+                {['admin','hr'].includes(user.role)&&<button onClick={()=>{setPinEmployee(employee);setPin('');setPinConfirmation('');setPinMessage('');setPinSaved(false);}} style={{padding:'8px 14px',borderRadius:7,border:`1px solid ${C.blue}`,background:`${C.blue}12`,color:C.blue,fontSize:12,fontWeight:700,cursor:'pointer',fontFamily:'inherit'}}>{t('Set or reset login PIN')}</button>}
                 <button onClick={()=>beginEdit(employee)} style={{padding:'8px 14px',borderRadius:7,border:`1px solid ${C.gold}`,background:`${C.gold}12`,color:C.gold,fontSize:12,fontWeight:700,cursor:'pointer',fontFamily:'inherit'}}>{t('Edit employee')}</button>
                 <button onClick={()=>setConfirmation({type:'delete',employeeId:employee.id})} style={{padding:'8px 14px',borderRadius:7,border:`1px solid ${C.red}55`,background:`${C.red}0b`,color:C.red,fontSize:12,fontWeight:700,cursor:'pointer',fontFamily:'inherit'}}>{t('Delete employee')}</button>
               </div>
@@ -155,6 +183,20 @@ export function TeamStatus() {
         </form>
       </div>}
 
+      {pinEmployee&&<div role="presentation" onMouseDown={event=>{if(event.target===event.currentTarget&&!pinSaving)setPinEmployee(null);}} style={{position:'fixed',inset:0,zIndex:1250,background:'rgba(15,27,45,.55)',display:'flex',alignItems:'center',justifyContent:'center',padding:16}}>
+        <form role="dialog" aria-modal="true" aria-labelledby="employee-pin-title" onSubmit={submitEmployeePin} style={{width:'100%',maxWidth:420,background:C.card,border:`1px solid ${C.border}`,borderRadius:12,padding:20,boxShadow:'0 16px 48px rgba(0,0,0,.24)'}}>
+          <div id="employee-pin-title" style={{fontSize:17,fontWeight:800,color:C.text,marginBottom:4}}>{t('Set or reset login PIN')}</div>
+          <div style={{fontSize:12,color:C.muted,marginBottom:14}}>{pinEmployee.name} · {pinEmployee.email}</div>
+          <div style={{display:'flex',flexDirection:'column',gap:11}}>
+            <label style={{fontSize:11,color:C.muted}}>{t('New 6-digit PIN')}<input type="password" inputMode="numeric" autoComplete="new-password" required minLength={6} maxLength={6} pattern="[0-9]{6}" value={pin} onChange={event=>setPin(event.target.value.replace(/\D/g,'').slice(0,6))} style={{...inputStyle,marginTop:5,fontSize:18,letterSpacing:5}} /></label>
+            <label style={{fontSize:11,color:C.muted}}>{t('Confirm 6-digit PIN')}<input type="password" inputMode="numeric" autoComplete="new-password" required minLength={6} maxLength={6} pattern="[0-9]{6}" value={pinConfirmation} onChange={event=>setPinConfirmation(event.target.value.replace(/\D/g,'').slice(0,6))} style={{...inputStyle,marginTop:5,fontSize:18,letterSpacing:5}} /></label>
+            <div style={{fontSize:11,color:C.muted,lineHeight:1.45}}>{t('Use six different-looking digits. Sequential and repeated digits are not accepted.')}</div>
+          </div>
+          {pinMessage&&<div role="status" style={{fontSize:12,color:pinSaved?C.green:C.red,marginTop:12,lineHeight:1.45}}>{pinMessage}</div>}
+          <div style={{display:'flex',justifyContent:'flex-end',gap:8,marginTop:16}}><button type="button" disabled={pinSaving} onClick={()=>setPinEmployee(null)} style={{padding:'8px 14px',borderRadius:7,border:`1px solid ${C.border}`,background:'transparent',color:C.muted,fontSize:12,cursor:'pointer',fontFamily:'inherit'}}>{t('Close')}</button><button type="submit" disabled={pinSaving} style={{padding:'8px 14px',borderRadius:7,border:0,background:C.gold,color:'#fff',fontSize:12,fontWeight:700,cursor:pinSaving?'wait':'pointer',fontFamily:'inherit'}}>{t(pinSaving?'Saving…':'Save PIN')}</button></div>
+        </form>
+      </div>}
+
       {confirmation&&<div role="presentation" style={{position:'fixed',inset:0,zIndex:1300,background:'rgba(15,27,45,.6)',display:'flex',alignItems:'center',justifyContent:'center',padding:16}}>
         <div role="alertdialog" aria-modal="true" aria-labelledby="employee-confirm-title" style={{width:'100%',maxWidth:400,background:C.card,border:`1px solid ${C.border}`,borderRadius:12,padding:20,boxShadow:'0 16px 48px rgba(0,0,0,.25)'}}>
           <div id="employee-confirm-title" style={{fontSize:16,fontWeight:800,color:C.text,marginBottom:8}}>{t(confirmation.type==='delete'?'Confirm employee deletion':confirmation.type==='add'?'Confirm new employee':'Confirm employee changes')}</div>
@@ -165,3 +207,4 @@ export function TeamStatus() {
     </div>
   );
 }
+
